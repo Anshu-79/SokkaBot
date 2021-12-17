@@ -3,48 +3,18 @@ from config import config as cfg
 from discord.ext import commands
 import discord
 from functions.music_functions.audio_configs import Video
+import functions.music_functions.checks as checks
 import logging
 import math
 import youtube_dl
 
 FFMPEG_BEFORE_OPTS = '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
 
-async def audio_playing(ctx):
-  #Checks if audio is playing currently before continuing.
-  client = ctx.guild.voice_client
-  if client and client.channel and client.source:
-    return True
-  else:
-    # print("Not playing any audio currently.")
-    return False
-
-async def in_voice_channel(ctx):
-  #Checks if the command sender is in the same voice channel as the bot.
-  voice = ctx.author.voice
-  bot_voice = ctx.guild.voice_client
-  if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
-    return True
-  else:
-    print("Command sender is not in the same voice channel as the bot.")
-    return False
-
-
-async def is_audio_requester(ctx):
-  #Checks if the command sender is also the song requester.
-  music = ctx.bot.get_cog("Music")
-  state = music.get_state(ctx.guild)
-  permissions = ctx.channel.permissions_for(ctx.author)
-  if permissions.administrator or state.is_requester(ctx.author):
-    return True
-  else:
-    print("Command sender is not song requester.")
-    return False
-
 class GuildState:
   #Helper class managing per-guild state.
 
   def __init__(self):
-    self.volume = 0.05
+    self.volume = 0.1
     self.playlist = []
     self.skip_votes = set()
     self.now_playing = None
@@ -79,18 +49,20 @@ class MusicCog(commands.Cog):
       await client.disconnect()
       state.playlist = []
       state.now_playing = None
+      print(f"\n{ctx.author.name} stopped the music.")
     else:
       await ctx.send("Not in a voice channel.")
     
   @commands.command(aliases=["resume"])
   @commands.guild_only()
-  @commands.check(audio_playing)
-  @commands.check(in_voice_channel)
-  #@commands.check(is_audio_requester)
+  @commands.check(checks.audio_playing)
+  @commands.check(checks.in_voice_channel)
+  #@commands.check(checks.is_audio_requester)
   async def pause(self, ctx):
     #Pauses or resumes any currently playing audio.
     client = ctx.guild.voice_client
     self._pause_audio(client)
+    print(f"\n{ctx.author.name} paused/played the music.")
     
   def _pause_audio(self, client):
     if client.is_paused():
@@ -100,9 +72,8 @@ class MusicCog(commands.Cog):
 
   @commands.command(aliases=["vol"])
   @commands.guild_only()
-  @commands.check(audio_playing)
-  @commands.check(in_voice_channel)
-  #@commands.check(is_audio_requester)
+  @commands.check(checks.audio_playing)
+  @commands.check(checks.in_voice_channel)
   async def volume(self, ctx, volume: int):
     #Changes the volume of currently playing audio (values 0-250).
     state = self.get_state(ctx.guild)
@@ -119,12 +90,13 @@ class MusicCog(commands.Cog):
 
     state.volume = float(volume) / 100.0
     client.source.volume = state.volume
+    print(f"\n{ctx.author.name} changed the volume to {volume}")
 
 
   @commands.command()
   @commands.guild_only()
-  @commands.check(audio_playing)
-  @commands.check(in_voice_channel)
+  @commands.check(checks.audio_playing)
+  @commands.check(checks.in_voice_channel)
   async def skip(self, ctx):
     #Votes for the currently playing song to be skipped.
     state = self.get_state(ctx.guild)
@@ -132,15 +104,15 @@ class MusicCog(commands.Cog):
     
     if ctx.channel.permissions_for(ctx.author).administrator or state.is_requester(ctx.author):
       client.stop()
+      
+      print(f"\n{ctx.author.name} skipped {state.now_playing.title} as an admin/song requester.")
       #skips if command sender is the requester or admin
 
     elif self.config['vote_skip']:
       #Checks if vote skipping is enabled & then executes _vote_skip()
       channel = client.channel
       self._vote_skip(channel, ctx.author)
-      await ctx.send(
-        f"{ctx.author.mention} skipped this song.")
-      
+            
       users_in_channel = len([
         member for member in channel.members if not member.bot
       ]) #counts users in channel & makes sure not to count bots
@@ -151,6 +123,9 @@ class MusicCog(commands.Cog):
       
       await ctx.send(
         f"{ctx.author.mention} voted to skip. ({len(state.skip_votes)}/{required_votes} votes as of now).")
+      
+      print(f"\n{ctx.author.name} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now).")
+
       
     else:
       await ctx.reply("Vote skipping is disabled.")
@@ -187,7 +162,7 @@ class MusicCog(commands.Cog):
     
     client.play(source, after=after_playing)
     #tells the bot to play song from the source
-
+    
   async def _add_reaction_controls(self, message):
     #Adds a 'control-panel' of reactions to a message that can be used to control the bot.
     CONTROLS = ["\U000023ee","\U000023ef","\U000023ed"]
@@ -196,21 +171,23 @@ class MusicCog(commands.Cog):
   
   @commands.command(aliases=['np'])
   @commands.guild_only()
-  @commands.check(audio_playing)
+  @commands.check(checks.audio_playing)
   async def nowplaying(self, ctx):
     #Displays information about the current song.
     state = self.get_state(ctx.guild)
     message = await ctx.send("", embed=state.now_playing.get_embed())
     #await message._add_reaction_controls(message)
     await self._add_reaction_controls(message)
+    print(f"\nTold {ctx.author.name} what's playing right now.")
     
   @commands.command(aliases=['q', 'playlist'])
   @commands.guild_only()
-  @commands.check(audio_playing)
+  @commands.check(checks.audio_playing)
   async def queue(self, ctx):
     #Displays the current play queue.
     state = self.get_state(ctx.guild)
     await ctx.send(self._queue_text(state.playlist))
+    print(f"\n{ctx.author.name} saw the playlist.")
 
   def _queue_text(self, queue):
     #Returns a block of text describing a given song queue.
@@ -226,16 +203,17 @@ class MusicCog(commands.Cog):
 
   @commands.command(aliases=['cq'])
   @commands.guild_only()
-  @commands.check(audio_playing)
+  @commands.check(checks.audio_playing)
   @commands.has_permissions(administrator=True)
   async def clearqueue(self, ctx):
     #Clears the play queue without leaving the channel
     state = self.get_state(ctx.guild)
     state.playlist = []
+    print(f"\n{ctx.author.name} cleared the playlist.")
 
   @commands.command(aliases=['jq'])
   @commands.guild_only()
-  @commands.check(audio_playing)
+  @commands.check(checks.audio_playing)
   @commands.has_permissions(administrator=True)
   async def jumpqueue(self, ctx, old_index: int, new_index: int):
     #moves song at an index to 'new_index in queue'
@@ -248,6 +226,7 @@ class MusicCog(commands.Cog):
       state.playlist.insert(new_index-1, song) #and inserts it at new_index
 
       await ctx.send(self._queue_text(state.playlist))
+      print(f"\n{ctx.author.name} moved {state.now_playing.title} from {old_index} to {new_index}")
     else:
       await ctx.send("You must use a valid index.")
 
@@ -268,6 +247,7 @@ class MusicCog(commands.Cog):
           "There was an error downloading your video, sorry.")
         return
       state.playlist.append(video)
+      print(f"\n{ctx.author.name} added '{video.title}' to the playlist")
       message = await ctx.send(
         "Added to queue.", embed=video.get_embed())
       await self._add_reaction_controls(message)
@@ -276,7 +256,7 @@ class MusicCog(commands.Cog):
         channel = ctx.author.voice.channel
         try:
           video = Video(url, ctx.author)
-        except youtube_dl.DownloadError as e:
+        except youtube_dl.DownloadError:
           await ctx.send(
             "There was an error downloading your video, sorry.")
           return
@@ -285,6 +265,7 @@ class MusicCog(commands.Cog):
         message = await ctx.send("", embed=video.get_embed())
         await self._add_reaction_controls(message)
         logging.info(f"Now playing '{video.title}'")
+        print(f"\nNow playing '{video.title}' requested by {ctx.author.name}")
       else:
         await ctx.send("You need to be in a voice channel to do that.")
         raise commands.CommandError(
@@ -309,15 +290,18 @@ class MusicCog(commands.Cog):
           if reaction.emoji == "\U000023ef":
             #pause audio
             self._pause_audio(client)
-          
+            print(f"\n{user.name} paused/resumed {state.now_playing.title} via reactions")
+            
           elif reaction.emoji == "\U000023ed":
             #skip audio
             client.stop()
+            print(f"\n{user.name} skipped {state.now_playing.title} as an admin/song requester.")
           
           elif reaction.emoji == "\U000023ee":
             state.playlist.insert(
               0, state.now_playing) #insert current song at beginning of playlist
             client.stop() #skip ahead
+            print(f"\n{user.name} replayed {state.now_playing.title}")
         
         elif reaction.emoji == "\U000023ed" and self.config["vote_skip"] and user_in_channel and message.guild.voice_client and message.guild.voice_client.channel:
           #ensure that skip was pressed, that vote skipping is enabled,
@@ -335,6 +319,7 @@ class MusicCog(commands.Cog):
             self.config["vote_skip_ratio"] * users_in_channel)
           await channel.send(
             f"{user.mention} voted to skip ({len(state.skip_votes)}/{required_votes} votes)")
+          print(f"\n{user.name} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now).")
 
   
 def setup(bot):
