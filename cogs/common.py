@@ -9,7 +9,7 @@ class CommonCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
   
-  @commands.command(name="hello")
+  @commands.command(name="hello", brief="Says hello")
   @commands.guild_only()
   async def say_hello(self, ctx):
     await ctx.reply(f"Hello, {ctx.author.name}! Sokka, the boomerang guy here.")
