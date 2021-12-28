@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from discord.ext import commands
 from discord.utils import get
 import pytz
@@ -55,20 +55,18 @@ class OwnerCog(commands.Cog):
     else:
       return False
 
-  def checkTime(self, send_time, out_queue):
+  def checkTime(self, sendTimeObj, out_queue):
     current_time = datetime.now(self.timezone)
     
-    while current_time.timestamp() <= datetime.strptime(send_time, self.time_format).timestamp():
-      print(current_time.timestamp())
+    while current_time.timestamp() <= sendTimeObj.timestamp():
       time.sleep(1)
       current_time = datetime.now(self.timezone)
-      current_datetime = current_time.strftime(self.time_format)
-      #print("Current Time =", current_datetime)
+      print(int(current_time.timestamp()), int(sendTimeObj.timestamp()))
     
-      if current_datetime == send_time:
-        print('Its time!')
+      if int(current_time.timestamp()) == int(sendTimeObj.timestamp()):
         self.queue.enque(True)
-    
+
+  
   @commands.group(name='sch', aliases=['schedule'])
   @commands.guild_only()
   async def sch(self, ctx):
@@ -83,53 +81,28 @@ $sch msg = To enter the date, time, place & text of announcement
       if text != '':
         #dt & dtObj will be in IST
         dt = d + ' ' + t
-        dtObj = datetime.strptime(dt, self.time_format)
-        
+        dtObj = self.timezone.localize(datetime.strptime(dt, self.time_format))
+        print('step1')
         #print(dtObj.timestamp(), datetime.now(self.timezone).timestamp())
         if dtObj.timestamp() > datetime.now(self.timezone).timestamp():
+          
           declare_list.append({'channel': channel_name})
           declare_list[-1]['text'] = f"{text}\n\nThis was an announcement made by {ctx.author}."
-          declare_list[-1]['datetime'] = dt
-
-        t1 = threading.Thread(target=self.checkTime, args=(dt, self.queue))
+          declare_list[-1]['datetime'] = dtObj
+          print('step2')
+        t1 = threading.Thread(target=self.checkTime, args=(dtObj, self.queue))
         t1.start()
 
         while True:
           flag = self.queue.isempty()
           if flag:
-            pass
+            break
           else:
             print(self.queue.deque())
             break
           
       else:
         await ctx.send("Please ensure that you're entering correct datetime.")
-        
-  '''
-  @commands.Cog.listener('on_message')
-  async def on_message(self, msg):
-    if msg.content.startswith('$sch msg'):  
-      if self.is_admin(msg):
-        channel = msg.channel
-        msg_ques = await channel.send("Reply the contents of the announcement to this message")
-
-        check = lambda m: m.author == msg.author and m.channel == msg.channel
-      
-        announcement = await self.bot.wait_for('msg_ques', check=check)
-        print(announcement.content)
-def checkTime():
-            threading.Timer(1, checkTime).start()
-  
-            now = datetime.now(self.timezone)
-  
-            current_datetime = now.strftime(self.time_format)
-            print("Current Time =", current_datetime)
-  
-            if (now == dtObj):
-              return True
-            else:
-              return False
-        
-     '''   
+     
 def setup(bot):
   bot.add_cog(OwnerCog(bot))
