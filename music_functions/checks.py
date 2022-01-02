@@ -18,15 +18,3 @@ async def in_voice_channel(ctx):
     print("Command sender is not in the same voice channel as the bot.")
     return False
 
-
-async def is_audio_requester(ctx):
-  #Checks if the command sender is also the song requester.
-  music = ctx.bot.get_cog("Music")
-  state = music.get_state(ctx.guild)
-  permissions = ctx.channel.permissions_for(ctx.author)
-  if permissions.administrator or state.is_requester(ctx.author):
-    return True
-  else:
-    print("Command sender is not song requester.")
-    return False
-

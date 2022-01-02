@@ -1,13 +1,15 @@
 import discord
 from discord.ext import commands
-from discord.utils import get
 
-from globals import server_dict
-from functions.get_mod_func import get_mod
-from functions.message_texts import new_member_message
+from functions.get_mod_func import get_mods
 from functions.addRole_function.addRoleEmbed import addRoleEmbed_func
 from functions.addRole_function.addRoleEmbedURL import url as roleURL
 from functions.addRole_function.reaction_dict import reactions
+
+
+def new_member_message(member_name):
+  new_member_greeting = f"What's up, {member_name}? I'm Sokka Bot from the Southern Water Tribe.\n\nI can do a bunch of totally weird random stuff.\nTo know more about that, type '$help'.\nAnd if there's something that I can't do, well, blame @Anshu79 for that."
+  return new_member_greeting
 
 
 def get_roles(ctx):
@@ -20,7 +22,6 @@ def get_roles(ctx):
     return list(commonRoles)
 
 
-
 class MembersCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
@@ -28,12 +29,13 @@ class MembersCog(commands.Cog):
   @commands.Cog.listener("on_member_join")
   async def on_member_join(self, member: discord.Member):
     bot = self.bot
-    gen_channel_id = 843500905123020802 #general channel's 
+    guild = member.guild
     
+    for gld in globals.server_dict:
+      if gld["server"] == guild.id:
+        channel_id = gld['gen_channel']
     
-    
-    channel = bot.get_channel(gen_channel_id)
-    # Says when a member joined.
+    channel = bot.get_channel(channel_id)
     await channel.send(new_member_message(member.display_name))
 
   
@@ -47,7 +49,6 @@ $role remove = Remove your current element""")
   
   @role.command()
   async def show(self, ctx):
-    bot = self.bot
 
     commonRoles = get_roles(ctx)
     if len(commonRoles) == 1:
@@ -58,7 +59,7 @@ $role remove = Remove your current element""")
       await ctx.reply("You're not a Bender currently.")
       
     elif len(commonRoles) > 1:
-      await ctx.reply(f"Error code: <Not Yet Decided>. Please report this to {get_mod(bot, ctx).mention}")
+      await ctx.reply(f"Error code: <Not Yet Decided>. Please report this to the admin.")
 
 
   @role.command()

@@ -2,8 +2,8 @@ import asyncio
 from config import config as cfg
 from discord.ext import commands
 import discord
-from functions.music_functions.audio_configs import Video
-import functions.music_functions.checks as checks
+from music_functions.audio_configs import Video
+import music_functions.checks as checks
 import logging
 import math
 import youtube_dl
@@ -37,11 +37,23 @@ class MusicCog(commands.Cog):
     else:
       self.states[guild.id] = GuildState()
       return self.states[guild.id]
-  
-  @commands.command(aliases=["leave"])
+
+  def is_dj(self, ctx):
+  #Checks if the user has the DJ role
+    dj =  discord.utils.get(ctx.guild.roles, name='DJ')
+    permissions = ctx.channel.permissions_for(ctx.author)
+      
+    if dj in ctx.author.roles or permissions.admininstrator:
+      return True
+    
+    else:
+      print("Command sender is not song requester.")
+      return False
+    
+  @commands.command(aliases=["stop"])
   @commands.guild_only()
   @commands.has_permissions(administrator=True)
-  async def stop(self, ctx):
+  async def leave(self, ctx):
     #Music stops and bot leaves the voice channel.
     client = ctx.guild.voice_client
     state = self.get_state(ctx.guild)
@@ -57,24 +69,24 @@ class MusicCog(commands.Cog):
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
-  #@commands.check(checks.is_audio_requester)
   async def pause(self, ctx):
     #Pauses or resumes any currently playing audio.
-    client = ctx.guild.voice_client
-    self._pause_audio(client)
-    print(f"\n{ctx.author.name} paused/played the music.")
-    
+    if self.is_dj(ctx):
+      client = ctx.guild.voice_client
+      self._pause_audio(client)
+      print(f"\n{ctx.author.name} paused/played the music.")
+      
   def _pause_audio(self, client):
     if client.is_paused():
       client.resume()
     else:
       client.pause()
 
-  @commands.command(aliases=["vol"])
+  @commands.command(aliases=["volume"])
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
-  async def volume(self, ctx, volume: int):
+  async def vol(self, ctx, volume: int):
     #Changes the volume of currently playing audio (values 0-250).
     state = self.get_state(ctx.guild)
 
@@ -93,7 +105,7 @@ class MusicCog(commands.Cog):
     print(f"\n{ctx.author.name} changed the volume to {volume}")
 
 
-  @commands.command()
+  @commands.command(aliases=['next'])
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
@@ -230,7 +242,7 @@ class MusicCog(commands.Cog):
     else:
       await ctx.send("You must use a valid index.")
 
-  @commands.command(brief="Plays audio from <url>.")
+  @commands.command()
   @commands.guild_only()
   async def play(self, ctx, *, url):
     #Plays audio hosted at <url> (or performs a search for <url> and plays the first result).
@@ -238,39 +250,43 @@ class MusicCog(commands.Cog):
     client = ctx.guild.voice_client
     state = self.get_state(ctx.guild)
 
-    if client and client.channel:
-      try:
-        video = Video(url, ctx.author)
-      except youtube_dl.DownloadError as e:
-        logging.warn(f"Error downloading video: {e}")
-        await ctx.send(
-          "There was an error downloading your video, sorry.")
-        return
-      state.playlist.append(video)
-      print(f"\n{ctx.author.name} added '{video.title}' to the playlist")
-      message = await ctx.send(
-        "Added to queue.", embed=video.get_embed())
-      await self._add_reaction_controls(message)
-    else:
-      if ctx.author.voice is not None and ctx.author.voice.channel is not None:
-        channel = ctx.author.voice.channel
+    if self.is_dj(ctx):
+      if client and client.channel:
         try:
           video = Video(url, ctx.author)
-        except youtube_dl.DownloadError:
+        except youtube_dl.DownloadError as e:
+          logging.warn(f"Error downloading video: {e}")
           await ctx.send(
             "There was an error downloading your video, sorry.")
           return
-        client = await channel.connect()
-        self._play_song(client, state, video)
-        message = await ctx.send("", embed=video.get_embed())
+        state.playlist.append(video)
+        print(f"\n{ctx.author.name} added '{video.title}' to the playlist")
+        message = await ctx.send(
+          "Added to queue.", embed=video.get_embed())
         await self._add_reaction_controls(message)
-        logging.info(f"Now playing '{video.title}'")
-        print(f"\nNow playing '{video.title}' requested by {ctx.author.name}")
       else:
-        await ctx.send("You need to be in a voice channel to do that.")
-        raise commands.CommandError(
-          "You need to be in a voice channel to do that.")
-        
+        if ctx.author.voice is not None and ctx.author.voice.channel is not None:
+          channel = ctx.author.voice.channel
+          try:
+            video = Video(url, ctx.author)
+          except youtube_dl.DownloadError:
+            await ctx.send(
+              "There was an error downloading your video, sorry.")
+            return
+          client = await channel.connect()
+          self._play_song(client, state, video)
+          message = await ctx.send("", embed=video.get_embed())
+          await self._add_reaction_controls(message)
+          logging.info(f"Now playing '{video.title}'")
+          print(f"\nNow playing '{video.title}' requested by {ctx.author.name}")
+        else:
+          await ctx.send("You need to be in a voice channel to do that.")
+          raise commands.CommandError(
+            "You need to be in a voice channel to do that.")
+
+    elif self.is_dj(ctx) == False:
+      await ctx.send("You don't have access to this command. You need to have the DJ role.")
+      
 
   async def on_reaction_add(self, reaction, user):
     #Responds to reactions added to the bot's messages, allowing reactions to control playback.

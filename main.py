@@ -1,3 +1,4 @@
+
 import discord
 from discord.ext import commands
 
@@ -24,7 +25,7 @@ intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
-# bot.remove_command("help")
+bot.remove_command("help")
 
 @bot.event
 async def on_ready():
@@ -33,7 +34,7 @@ async def on_ready():
   for cog in cogs:
     bot.load_extension(cog)
     print(cog+" was loaded.")
-  
+
   print("\nI'm ready to chat!")
 
 @bot.command()
