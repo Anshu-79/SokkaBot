@@ -2,8 +2,8 @@ import asyncio
 from config import config as cfg
 from discord.ext import commands
 import discord
-from functions.music_functions.audio_configs import Video
-import functions.music_functions.checks as checks
+from music_functions.audio_configs import Video
+import music_functions.checks as checks
 import logging
 import math
 import youtube_dl

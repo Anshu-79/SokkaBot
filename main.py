@@ -1,3 +1,4 @@
+
 import discord
 from discord.ext import commands
 
@@ -33,7 +34,7 @@ async def on_ready():
   for cog in cogs:
     bot.load_extension(cog)
     print(cog+" was loaded.")
-  
+
   print("\nI'm ready to chat!")
 
 @bot.command()
