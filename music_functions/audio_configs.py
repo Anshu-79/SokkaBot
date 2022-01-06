@@ -1,5 +1,5 @@
 import youtube_dl as ytdl
-import discord
+import disnake
 
 YTDL_OPTS = {
   "default_search": "ytsearch",
@@ -54,7 +54,7 @@ class Video:
   def get_embed(self):
     #makes an embed out of this Video's information.
     
-    embed = discord.Embed(
+    embed = disnake.Embed(
         title=self.title,
         description=f'''
           Uploader: {self.uploader}
@@ -63,7 +63,7 @@ class Video:
           Duration: {self.duration}''', url=self.video_url)
 
     embed.set_footer(text=f"Requested by {self.requested_by.name}",
-    icon_url=self.requested_by.avatar_url)
+    icon_url=self.requested_by.display_avatar.url)
 
     if self.thumbnail:
         embed.set_image(url=self.thumbnail)

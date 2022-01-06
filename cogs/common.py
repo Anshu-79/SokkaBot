@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 import time
 
 from functions.joke_function import joke_func
@@ -8,6 +8,11 @@ from functions.gif_functions.gif_function import gif_func
 class CommonCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
+
+  @commands.command(name='ping', brief="pings back")
+  async def ping(self, ctx):
+    await ctx.send("Pong! I'm alive.")
+    print(f"Told {ctx.author.name} that I'm alive.")
   
   @commands.command(name="hello", brief="Says hello")
   @commands.guild_only()
@@ -30,7 +35,8 @@ class CommonCog(commands.Cog):
     
   @commands.Cog.listener("on_message")
   async def send_gif(self, ctx):
-    if ctx.author != self.bot.user:
+    
+    if ctx.author != self.bot.user and len(ctx.embeds) == 0:
       message = ctx.content
       if gif_func(message) != None:
         gif_data = gif_func(message)
@@ -38,7 +44,7 @@ class CommonCog(commands.Cog):
         gif_phrase = gif_data["phrase"]
         gif_title = gif_data["name"]
       
-        embed = discord.Embed(
+        embed = disnake.Embed(
           title = gif_phrase,
           #description = "",
           color = ctx.author.color)

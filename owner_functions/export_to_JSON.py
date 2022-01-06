@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
   
-def save_data(ctx, channel, dt, text, tz, tf):
+def save_data(ctx, channel, dt, text, tz, tf, t_id):
   file = open('announcements.json', 'r+')
   file_data = json.load(file)
   #going back to the beginning after reading the whole file...
@@ -11,7 +11,8 @@ def save_data(ctx, channel, dt, text, tz, tf):
      "guild": ctx.guild.name,
     "datetime": dt,
     "text": text + f"\nThis was an announcement by {ctx.author.name}",
-    "author": ctx.author.name}]
+    "author": ctx.author.name,
+    "ticket_id": t_id}]
   
   file_data.extend(exportList)
   sorted_data = sorted(file_data, key=lambda x : tz.localize(datetime.strptime(x['datetime'], tf)).timestamp())

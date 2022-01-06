@@ -12,7 +12,7 @@ youtube-search = "^2.1.0"
 PyNaCl = "^1.4.0"
 youtube_dl = "^2021.6.6"
 pytz = "^2021.3"
-pause = "^0.3"
+disnake = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 

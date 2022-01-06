@@ -1,5 +1,5 @@
-import discord
-from discord.utils import get
+import disnake
+from disnake.utils import get
 import globals
 
 # This isn't updated with the current globals configs
@@ -9,6 +9,6 @@ def get_mods(bot, ctx):
   for guild in bot.guilds:
     if guild == input_guild:
       for mod_name in globals.server_dict[input_guild.name]['mods']:
-        mods.append(discord.utils.get(bot.users, name=mod_name))
+        mods.append(disnake.utils.get(bot.users, name=mod_name))
   
   return mods
