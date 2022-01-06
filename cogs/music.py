@@ -1,7 +1,7 @@
 import asyncio
 from config import config as cfg
-from discord.ext import commands
-import discord
+from disnake.ext import commands
+import disnake
 from music_functions.audio_configs import Video
 import music_functions.checks as checks
 import logging
@@ -40,7 +40,7 @@ class MusicCog(commands.Cog):
 
   def is_dj(self, ctx):
   #Checks if the user has the DJ role
-    dj =  discord.utils.get(ctx.guild.roles, name='DJ')
+    dj =  disnake.utils.get(ctx.guild.roles, name='DJ')
     permissions = ctx.channel.permissions_for(ctx.author)
       
     if dj in ctx.author.roles or permissions.admininstrator:
@@ -49,6 +49,20 @@ class MusicCog(commands.Cog):
     else:
       print("Command sender is not song requester.")
       return False
+
+  def _vote_skip(self, channel, member):
+      #Register a vote for 'member' to skip the song playing.
+      logging.info(f"{member.name} votes to skip")
+      state = self.get_state(channel.guild)
+      state.skip_votes.add(member)
+      
+      users_in_channel = len([
+        member for member in channel.members if not member.bot])
+      
+      if (float(len(state.skip_votes)) / users_in_channel) >= self.config['vote_skip_ratio']:
+        logging.info(f"Enough votes, skipping...")
+        channel.guild.voice_client.stop()
+
     
   @commands.command(aliases=["stop"])
   @commands.guild_only()
@@ -142,23 +156,11 @@ class MusicCog(commands.Cog):
     else:
       await ctx.reply("Vote skipping is disabled.")
 
-    def _vote_skip(self, channel, member):
-      #Register a vote for 'member' to skip the song playing.
-      logging.info(f"{member.name} votes to skip")
-      state = self.get_state(channel.guild)
-      state.skip_votes.add(member)
-      
-      users_in_channel = len([
-        member for member in channel.members if not member.bot])
-      
-      if (float(len(state.skip_votes)) / users_in_channel) >= self.config['vote_skip_ratio']:
-        logging.info(f"Enough votes, skipping...")
-        channel.guild.voice_client.stop()
       
   def _play_song(self, client, state, song):
     state.now_playing = song
     state.skip_votes = set() #clears skip votes
-    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song.stream_url, before_options=FFMPEG_BEFORE_OPTS), volume = state.volume) #gets the source of music
+    source = disnake.PCMVolumeTransformer(disnake.FFmpegPCMAudio(song.stream_url, before_options=FFMPEG_BEFORE_OPTS), volume = state.volume) #gets the source of music
 
     def after_playing(err):
       #defines what to do after a song ends

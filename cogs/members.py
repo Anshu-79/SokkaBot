@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 
 from functions.get_mod_func import get_mods
 from functions.addRole_function.addRoleEmbed import addRoleEmbed_func
@@ -25,18 +25,12 @@ def get_roles(ctx):
 class MembersCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
-
+  
   @commands.Cog.listener("on_member_join")
-  async def on_member_join(self, member: discord.Member):
-    bot = self.bot
+  async def on_member_join(self, member: disnake.Member):
     guild = member.guild
-    
-    for gld in globals.server_dict:
-      if gld["server"] == guild.id:
-        channel_id = gld['gen_channel']
-    
-    channel = bot.get_channel(channel_id)
-    await channel.send(new_member_message(member.display_name))
+    sys_msg_channel = guild.system_channel
+    await sys_msg_channel.send(new_member_message(member.display_name))
 
   
   @commands.group(name="role")
@@ -111,7 +105,7 @@ $role remove = Remove your current element""")
           if len(get_commons(member)) == 0:
             for our_emoji in reactions:
               if payload_emoji == reactions[our_emoji]:
-                role = discord.utils.get(guild.roles, name=our_emoji)
+                role = disnake.utils.get(guild.roles, name=our_emoji)
                 if role is not None:
                   if member is not None:
                       print(f"\n{member.name} is now a {role.name}")

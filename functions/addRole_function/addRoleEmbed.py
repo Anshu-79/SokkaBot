@@ -1,8 +1,8 @@
-import discord
+import disnake
 from functions.addRole_function.addRoleEmbedURL import url as url
 
 def addRoleEmbed_func(author):
-  addRoleEmbed = discord.Embed(
+  addRoleEmbed = disnake.Embed(
     title = "Choose Your Bending!",
     colour = author.color
 )

@@ -1,16 +1,17 @@
 
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 
 import globals
 from keep_alive import keep_alive
 
 import os
+import traceback
 
 botToken = os.environ['botToken']
 
 def get_prefix(bot, message):
-    # Notice how you can use spaces in prefixes. Try to keep them simple though.
+    
     prefixes = ['$']
 
     if not message.guild:
@@ -19,29 +20,56 @@ def get_prefix(bot, message):
     # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
+
+def fancy_traceback(exc: Exception) -> str:
+  """May not fit the message content limit"""
+  text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+  return f"```py\n{text[-512:]}\n```"
+
+
 cogs = ['cogs.owner','cogs.common', 'cogs.members', 'cogs.music']
 
-intents = discord.Intents.default()
+intents = disnake.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
+
+class SokkaBot(commands.Bot):
+  def __init__(self):
+    super().__init__(
+      command_prefix = get_prefix,
+      intents = intents,
+      help_command = None,
+    )
+
+  def load_all_extensions(self, cogs_list):
+    print('Loading cogs...\n')
+    for cog in cogs_list:
+      self.load_extension(cog)
+      print(f"{cog} was loaded.")
+
+  async def on_ready(self):
+    print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\n')
+    
+    print("I'm ready to chat!\n")
+
+
+  async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
+    embed = disnake.Embed(
+        title="I'm sorry, Dave. I'm afraid I can't do that.",
+        description=f"Command `{ctx.command}` failed due to `{error}`\n{fancy_traceback(error)}",
+        color=disnake.Color.red(),
+    )
+    await ctx.send(embed=embed)
+
+  
+
+bot = SokkaBot()
 bot.remove_command("help")
+bot.load_all_extensions(cogs)
 
-@bot.event
-async def on_ready():
-  print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\n')
-  print("Loading cogs...\n")
-  for cog in cogs:
-    bot.load_extension(cog)
-    print(cog+" was loaded.")
-
-  print("\nI'm ready to chat!")
-
-@bot.command()
-async def ping(ctx):
-  await ctx.send("Ping! I'm alive.")
-  print(f"Told {ctx.message.author} that I'm alive.")
+print(f"disnake: {disnake.__version__}\n")
 
 keep_alive()
 
-bot.run(botToken, bot=True, reconnect=True)
+bot.run(botToken)#, bot=True, reconnect=True)

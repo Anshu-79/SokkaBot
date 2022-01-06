@@ -1,13 +1,18 @@
 from datetime import datetime
-from discord.ext import commands, tasks
-from discord.utils import get
+from disnake.ext import commands, tasks
+from disnake.utils import get
 import pytz
+import uuid
+
 
 from functions.get_mod_func import get_mods
 from owner_functions.export_to_JSON import save_data
 from owner_functions.import_from_JSON import get_data
 from owner_functions import remove_announcement
-from owner_functions.min_timestamp import min_timestamp
+from owner_functions.min_time_dict import minTimeDict
+from owner_functions.ticket_id_functions import getDictByTicketID
+from owner_functions.ticket_id_functions import updateDictByTicketID
+from owner_functions.text_to_timestamp import text_2_timestamp
 
 class OwnerCog(commands.Cog):
   def __init__(self, bot):
@@ -30,13 +35,25 @@ class OwnerCog(commands.Cog):
       return False
 
   
+  @commands.Cog.listener('on_ready')
+  async def on_ready(self):
+    if minTimeDict() != None:
+      self.checkTime.start(minTimeDict())
+
+  
   @commands.group(name='sch', aliases=['schedule'])
   @commands.guild_only()
   async def sch(self, ctx):
     if ctx.invoked_subcommand is None:
       await ctx.send("""
 $sch msg = To enter the date, time, place & text of announcement
-  Syntax: $sch msg <name of channel> DD-MM-YYYY HH:MM:SS\n<your text of announcement>\nPS: Use 24-hr format""")
+      Syntax: $sch msg <name of channel> DD-MM-YYYY HH:MM:SS <your text of announcement>\nPS: Use 24-hr format\n\n
+$sch edit = To edit a pre-scheduled message
+      Syntax: $sch edit <ticket ID>
+      {<Whichever entry you want to edit>}
+      For eg: {"text": "<New text>",
+              "channel": "<New channel>"} \nPS: The curly braces and quotes are important
+  """)
   
   @sch.command()
   async def msg(self, ctx, *, inp):
@@ -56,21 +73,42 @@ $sch msg = To enter the date, time, place & text of announcement
         
         if dtObj.timestamp() > datetime.now(self.tz).timestamp():
           #saves the data to a JSON file
-          save_data(ctx, channel_name, dt, text, self.tz, self.time_format)
+          ticket_id = uuid.uuid4().fields[1]
+          
+          save_data(ctx, channel_name, dt, text, self.tz, self.time_format, ticket_id)
+          await ctx.reply(f"Message scheduled. Your ticket id is {ticket_id}")
           print(f"An announcement was scheduled for {dt} in {channel_name} by {ctx.author.name}")
-          self.checkTime.start('anything go here rn')
+          try:
+            self.checkTime.start('anything go here rn')
+          except RuntimeError:
+            print('\nAnother message was scheduled earlier than the current one...\n')
         else:
           await ctx.send("Please ensure that you're entering correct datetime.")
       else:
         await ctx.send("Invalid input")
+
+  @sch.command()
+  async def edit(self, ctx, t_id, *, data):
+    print(getDictByTicketID(int(t_id)))
+    if getDictByTicketID(int(t_id)) != None:
+      #try:
+      updateDictByTicketID(int(t_id), eval(data))
+      #except NameError:
+       # await ctx.send('You forgot the quotes, mate. Try again.')
+      #except SyntaxError:
+       # await ctx.send('You forgot the curly braces. Try again.')
+
   
   @tasks.loop(seconds=1)
   async def checkTime(self, data):
-  
-    current_time = datetime.now(self.tz)
-    final_timestamp = min_timestamp()
     
-    if final_timestamp == int(current_time.timestamp()):
+    current_time = datetime.now(self.tz)
+    final_timestamp = text_2_timestamp(minTimeDict()['datetime'])
+    
+    if final_timestamp != int(current_time.timestamp()):
+      final_timestamp = text_2_timestamp(minTimeDict()['datetime'])
+    
+    elif final_timestamp == int(current_time.timestamp()):
       data = get_data()
       guild = get(self.bot.guilds, name=data['guild'])
       channel = get(guild.text_channels, name=data['channel'])

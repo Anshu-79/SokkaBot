@@ -1,4 +1,4 @@
-import discord
+
 from functions.gif_functions.gif_database import gif_data_list
 
 def gif_func(input_msg):
