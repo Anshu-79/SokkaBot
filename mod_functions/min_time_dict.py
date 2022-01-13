@@ -1,5 +1,5 @@
 import json
-from owner_functions.text_to_timestamp import text_2_timestamp
+from mod_functions.text_to_timestamp import text_2_timestamp
 
 def minTimeDict():
   

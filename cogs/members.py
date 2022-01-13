@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-from functions.get_mod_func import get_mods
+#from functions.get_mod_func import get_mods
 from functions.addRole_function.addRoleEmbed import addRoleEmbed_func
 from functions.addRole_function.addRoleEmbedURL import url as roleURL
 from functions.addRole_function.reaction_dict import reactions
@@ -25,6 +25,7 @@ def get_roles(ctx):
 class MembersCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
+    self.__doc__ = "Module with members-related commands"
   
   @commands.Cog.listener("on_member_join")
   async def on_member_join(self, member: disnake.Member):
@@ -33,7 +34,7 @@ class MembersCog(commands.Cog):
     await sys_msg_channel.send(new_member_message(member.display_name))
 
   
-  @commands.group(name="role")
+  @commands.group(name="role", help="Role related functions")
   async def role(self, ctx):
     if ctx.invoked_subcommand is None:
       await ctx.send("""

@@ -8,19 +8,22 @@ from functions.gif_functions.gif_function import gif_func
 class CommonCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
+    self.__doc__ = "Module with common commands for everyone's use"
 
-  @commands.command(name='ping', brief="pings back")
+  @commands.command(name='ping', help="Pings you back along with latency")
   async def ping(self, ctx):
-    await ctx.send("Pong! I'm alive.")
+    await ctx.send(f"Pong! I'm alive.\nLatency = {round(self.bot.latency * 1000, 3)} ms")
     print(f"Told {ctx.author.name} that I'm alive.")
+    
   
-  @commands.command(name="hello", brief="Says hello")
+  @commands.command(name="hello", help="Says hello")
   @commands.guild_only()
   async def say_hello(self, ctx):
     await ctx.reply(f"Hello, {ctx.author.name}! Sokka, the boomerang guy here.")
     print(f"\nSaid hello to {ctx.author.name}.")
+
   
-  @commands.command(name="joke")
+  @commands.command(name="joke", help='Tells you a joke')
   async def tell_joke(self, ctx):
     joke = joke_func()
     if isinstance(joke, str):
