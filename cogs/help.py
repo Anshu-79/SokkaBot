@@ -53,7 +53,7 @@ class HelpCog(commands.Cog):
       if commands_desc:
         emb.add_field(name='Not belonging to a module', value=commands_desc, inline=False)
         
-      emb.add_field(name="About", value=f"This bot is developed & maintained by Anshu79#2928 \nPlease DM me to submit ideas & bugs")
+      emb.add_field(name="About", value=f"This bot is developed & maintained by Anshu79#2928 \n\nPlease DM me to submit ideas & bugs")
         
       emb.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
 
