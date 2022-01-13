@@ -29,6 +29,7 @@ class MusicCog(commands.Cog):
     self.config = config["music"]
     self.states = {}
     self.bot.add_listener(self.on_reaction_add, 'on_reaction_add')
+    self.__doc__ = "Module with music related commands"
 
   def get_state(self, guild):
     #Gets the state of guild & creates one if it doesn't exist
@@ -42,7 +43,7 @@ class MusicCog(commands.Cog):
   #Checks if the user has the DJ role
     dj =  disnake.utils.get(ctx.guild.roles, name='DJ')
     permissions = ctx.channel.permissions_for(ctx.author)
-      
+    
     if dj in ctx.author.roles or permissions.admininstrator:
       return True
     
@@ -64,7 +65,7 @@ class MusicCog(commands.Cog):
         channel.guild.voice_client.stop()
 
     
-  @commands.command(aliases=["stop"])
+  @commands.command(aliases=["stop"], help="Stops the music and leaves the channel")
   @commands.guild_only()
   @commands.has_permissions(administrator=True)
   async def leave(self, ctx):
@@ -76,10 +77,11 @@ class MusicCog(commands.Cog):
       state.playlist = []
       state.now_playing = None
       print(f"\n{ctx.author.name} stopped the music.")
+      
     else:
       await ctx.send("Not in a voice channel.")
     
-  @commands.command(aliases=["resume"])
+  @commands.command(aliases=["resume"], help="Pauses or resumes the music")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
@@ -96,7 +98,7 @@ class MusicCog(commands.Cog):
     else:
       client.pause()
 
-  @commands.command(aliases=["volume"])
+  @commands.command(aliases=["volume"], help="Changes the volume in a range between 0-250")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
@@ -119,7 +121,7 @@ class MusicCog(commands.Cog):
     print(f"\n{ctx.author.name} changed the volume to {volume}")
 
 
-  @commands.command(aliases=['next'])
+  @commands.command(aliases=['next'], help="Skips the song if you are the requester or admin, and tells that you're voting to skip this song otherwise")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.check(checks.in_voice_channel)
@@ -183,7 +185,7 @@ class MusicCog(commands.Cog):
     for control in CONTROLS:
       await message.add_reaction(control)
   
-  @commands.command(aliases=['np'])
+  @commands.command(aliases=['np'], help="Tells what's playing rn")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   async def nowplaying(self, ctx):
@@ -194,7 +196,7 @@ class MusicCog(commands.Cog):
     await self._add_reaction_controls(message)
     print(f"\nTold {ctx.author.name} what's playing right now.")
     
-  @commands.command(aliases=['q', 'playlist'])
+  @commands.command(aliases=['q', 'playlist'], help="Sends the current playlist")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   async def queue(self, ctx):
@@ -215,7 +217,7 @@ class MusicCog(commands.Cog):
     else:
       return "The play queue is empty."
 
-  @commands.command(aliases=['cq'])
+  @commands.command(aliases=['cq'], help="clears the playlist")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.has_permissions(administrator=True)
@@ -225,7 +227,7 @@ class MusicCog(commands.Cog):
     state.playlist = []
     print(f"\n{ctx.author.name} cleared the playlist.")
 
-  @commands.command(aliases=['jq'])
+  @commands.command(aliases=['jq'], help="Moves a song from initial position in playlist to a new one")
   @commands.guild_only()
   @commands.check(checks.audio_playing)
   @commands.has_permissions(administrator=True)
@@ -244,7 +246,7 @@ class MusicCog(commands.Cog):
     else:
       await ctx.send("You must use a valid index.")
 
-  @commands.command()
+  @commands.command(aliases=['p'], help="Plays a YT video with its name or its URL")
   @commands.guild_only()
   async def play(self, ctx, *, url):
     #Plays audio hosted at <url> (or performs a search for <url> and plays the first result).

@@ -6,19 +6,20 @@ import uuid
 
 
 from functions.get_mod_func import get_mods
-from owner_functions.export_to_JSON import save_data
-from owner_functions.import_from_JSON import get_data
-from owner_functions import remove_announcement
-from owner_functions.min_time_dict import minTimeDict
-from owner_functions.ticket_id_functions import getDictByTicketID
-from owner_functions.ticket_id_functions import updateDictByTicketID
-from owner_functions.text_to_timestamp import text_2_timestamp
+from mod_functions.export_to_JSON import save_data
+from mod_functions.import_from_JSON import get_data
+from mod_functions import remove_announcement
+from mod_functions.min_time_dict import minTimeDict
+from mod_functions.ticket_id_functions import getDictByTicketID
+from mod_functions.ticket_id_functions import updateDictByTicketID
+from mod_functions.text_to_timestamp import text_2_timestamp
 
-class OwnerCog(commands.Cog):
+class ModCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
     self.tz = pytz.timezone('Asia/Kolkata')
     self.time_format = "%d-%m-%Y %H:%M:%S"
+    self.__doc__ = 'Module with commands for mods'
 
   def joiner(self, l):
     s = ''
@@ -41,7 +42,7 @@ class OwnerCog(commands.Cog):
       self.checkTime.start(minTimeDict())
 
   
-  @commands.group(name='sch', aliases=['schedule'])
+  @commands.group(name='sch', aliases=['schedule'], help="Message scheduling related commands")
   @commands.guild_only()
   async def sch(self, ctx):
     if ctx.invoked_subcommand is None:
@@ -123,4 +124,4 @@ $sch edit = To edit a pre-scheduled message
         self.checkTime.stop()
       
 def setup(bot):
-  bot.add_cog(OwnerCog(bot))
+  bot.add_cog(ModCog(bot))
