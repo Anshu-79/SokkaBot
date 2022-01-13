@@ -8,7 +8,7 @@ from keep_alive import keep_alive
 import os
 import traceback
 
-hal_url = "https://res.cloudinary.com/teepublic/image/private/s--UA3EJ8el--/t_Preview/b_rgb:191919,c_limit,f_jpg,h_630,q_90,w_630/v1489665271/production/designs/1328689_1.jpg"
+hal_url = os.environ['halURL']
 
 botToken = os.environ['botToken']
 

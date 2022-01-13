@@ -1,5 +1,7 @@
+import aiohttp
 import disnake
 from disnake.ext import commands
+import json
 import time
 
 from functions.joke_function import joke_func
@@ -10,11 +12,12 @@ class CommonCog(commands.Cog):
     self.bot = bot
     self.__doc__ = "Module with common commands for everyone's use"
 
+  
   @commands.command(name='ping', help="Pings you back along with latency")
   async def ping(self, ctx):
     await ctx.send(f"Pong! I'm alive.\nLatency = {round(self.bot.latency * 1000, 3)} ms")
     print(f"Told {ctx.author.name} that I'm alive.")
-    
+
   
   @commands.command(name="hello", help="Says hello")
   @commands.guild_only()
@@ -25,14 +28,17 @@ class CommonCog(commands.Cog):
   
   @commands.command(name="joke", help='Tells you a joke')
   async def tell_joke(self, ctx):
-    joke = joke_func()
-    if isinstance(joke, str):
-      await ctx.reply(joke)
+    async with aiohttp.ClientSession() as session:
+      request = await session.get("https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky?blacklistFlags=nsfw,racist,sexist,explicit")
+    json_data = await request.json()
+    if 'joke' in json_data.keys():
+      await ctx.reply(json_data['joke'])
       print(f"\nTold a one-part joke to {ctx.author.name}.")
-    if isinstance(joke, list):
-      await ctx.reply(joke[0])
+      
+    if 'setup' and 'delivery' in json_data.keys():
+      await ctx.reply(json_data['setup'])
       time.sleep(1)
-      await ctx.reply(joke[1])
+      await ctx.reply(json_data['delivery'])
       print(f"\nTold a two-part joke to {ctx.author.name}.")
 
     
