@@ -36,6 +36,13 @@ class ModCog(commands.Cog):
       return False
 
   
+  @commands.has_permissions(administrator=True)
+  @commands.command(name='purge', help='Deletes a specific number of messages')
+  async def purge(self, ctx, number: int):
+    await ctx.channel.purge(limit=number)
+    print(f'Purged {number} messages in {ctx.channel.name}')
+
+  
   @commands.Cog.listener('on_ready')
   async def on_ready(self):
     if minTimeDict() != None:

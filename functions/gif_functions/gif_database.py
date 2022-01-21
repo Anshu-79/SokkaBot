@@ -33,7 +33,7 @@ gif_data_list = [
       "phrase": "Amaaaaazing"},
 
     { "name": "Scared Zuko",
-      "tags": ["wait what", "wait a minute", "ghost", "wait a second"],
+      "tags": ["wait what", "wait a minute", "ghost", "wait a sec"],
       "url": "https://media.tenor.com/images/9b95c17560e464a6697dce5f211d357b/tenor.gif",
       "phrase": "That was like:"},
     
@@ -103,9 +103,9 @@ gif_data_list = [
       "phrase": ""},
     
     { "name": "Scary Azula",
-      "tags": ["zombie", "scary", "evil", "creepy"],
+      "tags": ["scary", "evil", "creepy"],
       "url": "https://c.tenor.com/1gTERIH6mfAAAAAC/aang-atla.gif",
-      "phrase": "Whatever it is, but she was worse."},
+      "phrase": "IDK what you're talking about, but she was worse."},
 
     { "name": "Excuse Me",
       "tags": ["excuse me"],
