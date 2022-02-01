@@ -16,6 +16,7 @@ async def send_embed(ctx, embed):
         f"Hey, seems like I can't send any message in {ctx.channel.name} on {ctx.guild.name}\n"
         f"Could you inform the server mods about this issue?", embed=embed)
 
+
 class HelpCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot

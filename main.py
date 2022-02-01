@@ -9,9 +9,6 @@ from keep_alive import keep_alive
 import os
 import traceback
 
-import asyncio
-import sqlite_connection as sql
-
 hal_url = os.environ['halURL']
 
 botToken = os.environ['botToken']
@@ -28,7 +25,7 @@ def get_prefix(bot, message):
 
 
 def fancy_traceback(exc: Exception) -> str:
-  """May not fit the message content limit"""
+  #if the text may not fit the message content limit
   text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
   return f"```py\n{text[-512:]}\n```"
 
@@ -57,7 +54,7 @@ class SokkaBot(commands.Bot):
   async def on_ready(self):
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\n')
     #loop = asyncio.get_event_loop()
-    await sql.main()
+    #await sql.main()
     #await loop.run_until_complete(sql.main())
     print("I'm ready to chat!\n")
 
