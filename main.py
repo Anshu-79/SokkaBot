@@ -1,12 +1,16 @@
 
 import disnake
 from disnake.ext import commands
+import os
 
 import globals
 from keep_alive import keep_alive
 
 import os
 import traceback
+
+import asyncio
+import sqlite_connection as sql
 
 hal_url = os.environ['halURL']
 
@@ -52,10 +56,12 @@ class SokkaBot(commands.Bot):
 
   async def on_ready(self):
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\n')
-    
+    #loop = asyncio.get_event_loop()
+    await sql.main()
+    #await loop.run_until_complete(sql.main())
     print("I'm ready to chat!\n")
 
-
+    
   async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
     embed = disnake.Embed(
         title="I'm sorry, Dave. I'm afraid I can't do that.",

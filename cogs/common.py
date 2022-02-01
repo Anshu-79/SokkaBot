@@ -1,10 +1,8 @@
 import aiohttp
 import disnake
 from disnake.ext import commands
-import json
 import time
 
-from functions.joke_function import joke_func
 from functions.gif_functions.gif_function import gif_func
 
 class CommonCog(commands.Cog):
