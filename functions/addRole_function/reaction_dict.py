@@ -1,6 +1,6 @@
 reactions = {
-  "Fire-Bender": "🔥",
-  "Water-Bender": "🌊",
-  "Earth-Bender": "⛰️",
-  "Air-Bender": "🌪️"
+    "Fire-Bender": "🔥",
+    "Water-Bender": "🌊",
+    "Earth-Bender": "⛰️",
+    "Air-Bender": "🌪️",
 }
