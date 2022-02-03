@@ -2,7 +2,6 @@ import disnake
 from disnake.ext import commands
 import os
 
-import globals
 from keep_alive import keep_alive
 
 import traceback
