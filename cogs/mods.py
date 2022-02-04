@@ -4,8 +4,7 @@ from disnake.utils import get
 import pytz
 import uuid
 
-
-from functions.get_mod_func import get_mods
+import globals
 from mod_functions.export_to_JSON import save_data
 from mod_functions.import_from_JSON import get_data
 from mod_functions import remove_announcement
@@ -24,7 +23,9 @@ class ModCog(commands.Cog):
 
     def is_admin(self, ctx):
         permissions = ctx.channel.permissions_for(ctx.author)
-        mods = get_mods(self.bot, ctx)
+        mods = [
+            i["mods"] for i in globals.server_dict if i["id"] == ctx.message.guild.id
+        ]
         if permissions.administrator or ctx.author in mods:
             return True
         else:
@@ -50,12 +51,13 @@ class ModCog(commands.Cog):
             await ctx.send(
                 """
 $sch msg = To enter the date, time, place & text of announcement
-      Syntax: $sch msg <name of channel> DD-MM-YYYY HH:MM:SS <your text of announcement>\nPS: Use 24-hr format\n\n
+    Syntax: $sch msg <name of channel> DD-MM-YYYY HH:MM:SS <your text of announcement>\nPS: Use 24-hr format\n\n
 $sch edit = To edit a pre-scheduled message
-      Syntax: $sch edit <ticket ID>
-      {<Whichever entry you want to edit>}
-      For eg: {"text": "<New text>",
-              "channel": "<New channel>"} \nPS: The curly braces and quotes are important
+    Syntax: $sch edit <ticket ID>
+    {<Whichever entry you want to edit>}
+    For eg: {"text": "<New text>",
+            "channel": "<New channel>"} 
+    PS: The curly braces and quotes are important
   """
             )
 
