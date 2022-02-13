@@ -1,4 +1,5 @@
 from datetime import datetime
+import disnake
 from disnake.ext import commands, tasks
 from disnake.utils import get
 import pytz
@@ -31,6 +32,26 @@ class ModCog(commands.Cog):
         else:
             return False
 
+    class ScheduleView(disnake.ui.View):
+        def __init__(self, ctx):
+            super().__init__()
+            self.subcommand = None
+            self.ctx = ctx
+
+        @disnake.ui.button(label="New", style=disnake.ButtonStyle.green)
+        async def new(self, button, interaction):
+            pass
+
+        @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.blurple)
+        async def edit(self, button, interaction):
+            pass
+
+        @disnake.ui.button(label="Delete", style=disnake.ButtonStyle.red)
+        async def delete(self, button, interaction):
+            pass
+
+    
+
     @commands.has_permissions(administrator=True)
     @commands.command(name="purge", help="Deletes a specific number of messages")
     async def purge(self, ctx, number: int):
@@ -42,6 +63,7 @@ class ModCog(commands.Cog):
         if minTimeDict() != None:
             self.checkTime.start(minTimeDict())
 
+    
     @commands.group(
         name="sch", aliases=["schedule"], help="Message scheduling related commands"
     )
@@ -91,7 +113,7 @@ $sch edit = To edit a pre-scheduled message
                     )
                     await ctx.reply(f"Message scheduled. Your ticket id is {ticket_id}")
                     print(
-                        f"An announcement was scheduled for {dt} in {channel_name} by {ctx.author.name}"
+                        f"An announcement was scheduled for {dt} in {channel_name} by {ctx.author}"
                     )
                     try:
                         self.checkTime.start("anything go here rn")

@@ -77,7 +77,7 @@ class MusicCog(commands.Cog):
             await client.disconnect()
             state.playlist = []
             state.now_playing = None
-            print(f"\n{ctx.author.name} stopped the music.")
+            print(f"\n{ctx.author} stopped the music.")
 
         else:
             await ctx.send("Not in a voice channel.")
@@ -91,7 +91,7 @@ class MusicCog(commands.Cog):
         if self.is_dj(ctx):
             client = ctx.guild.voice_client
             self._pause_audio(client)
-            print(f"\n{ctx.author.name} paused/played the music.")
+            print(f"\n{ctx.author} paused/played the music.")
 
     def _pause_audio(self, client):
         if client.is_paused():
@@ -121,7 +121,7 @@ class MusicCog(commands.Cog):
 
         state.volume = float(volume) / 100.0
         client.source.volume = state.volume
-        print(f"\n{ctx.author.name} changed the volume to {volume}")
+        print(f"\n{ctx.author} changed the volume to {volume}")
 
     @commands.command(
         aliases=["next"],
@@ -141,7 +141,7 @@ class MusicCog(commands.Cog):
             client.stop()
 
             print(
-                f"\n{ctx.author.name} skipped {state.now_playing.title} as an admin/song requester."
+                f"\n{ctx.author} skipped {state.now_playing.title} as an admin/song requester."
             )
             # skips if command sender is the requester or admin
 
@@ -164,7 +164,7 @@ class MusicCog(commands.Cog):
             )
 
             print(
-                f"\n{ctx.author.name} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
+                f"\n{ctx.author} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
             )
 
         else:
@@ -210,7 +210,7 @@ class MusicCog(commands.Cog):
         message = await ctx.send("", embed=state.now_playing.get_embed())
         # await message._add_reaction_controls(message)
         await self._add_reaction_controls(message)
-        print(f"\nTold {ctx.author.name} what's playing right now.")
+        print(f"\nTold {ctx.author} what's playing right now.")
 
     @commands.command(aliases=["q", "playlist"], help="Sends the current playlist")
     @commands.guild_only()
@@ -219,7 +219,7 @@ class MusicCog(commands.Cog):
         # Displays the current play queue.
         state = self.get_state(ctx.guild)
         await ctx.send(self._queue_text(state.playlist))
-        print(f"\n{ctx.author.name} saw the playlist.")
+        print(f"\n{ctx.author} saw the playlist.")
 
     def _queue_text(self, queue):
         # Returns a block of text describing a given song queue.
@@ -241,7 +241,7 @@ class MusicCog(commands.Cog):
         # Clears the play queue without leaving the channel
         state = self.get_state(ctx.guild)
         state.playlist = []
-        print(f"\n{ctx.author.name} cleared the playlist.")
+        print(f"\n{ctx.author} cleared the playlist.")
 
     @commands.command(
         aliases=["jq"],
@@ -262,7 +262,7 @@ class MusicCog(commands.Cog):
 
             await ctx.send(self._queue_text(state.playlist))
             print(
-                f"\n{ctx.author.name} moved {state.now_playing.title} from {old_index} to {new_index}"
+                f"\n{ctx.author} moved {state.now_playing.title} from {old_index} to {new_index}"
             )
         else:
             await ctx.send("You must use a valid index.")
@@ -284,7 +284,7 @@ class MusicCog(commands.Cog):
                     await ctx.send("There was an error downloading your video, sorry.")
                     return
                 state.playlist.append(video)
-                print(f"\n{ctx.author.name} added '{video.title}' to the playlist")
+                print(f"\n{ctx.author} added '{video.title}' to the playlist")
                 message = await ctx.send("Added to queue.", embed=video.get_embed())
                 await self._add_reaction_controls(message)
             else:
@@ -306,7 +306,7 @@ class MusicCog(commands.Cog):
                     await self._add_reaction_controls(message)
                     logging.info(f"Now playing '{video.title}'")
                     print(
-                        f"\nNow playing '{video.title}' requested by {ctx.author.name}"
+                        f"\nNow playing '{video.title}' requested by {ctx.author}"
                     )
                 else:
                     await ctx.send("You need to be in a voice channel to do that.")

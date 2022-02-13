@@ -19,11 +19,12 @@ class MembersCog(commands.Cog):
         self.bot = bot
         self.__doc__ = "Module with members-related commands"
 
-    class Role(disnake.ui.View):
+    class RoleView(disnake.ui.View):
         def __init__(self, ctx):
-            super().__init__()
+            super().__init__(timeout=60.0)
             self.chosen_func = None
             self.ctx = ctx
+
 
         def get_roles(self, ctx):
             ourRoles = set(reactions.keys())
@@ -34,7 +35,7 @@ class MembersCog(commands.Cog):
         async def show_func(self, ctx):
             commonRoles = self.get_roles(ctx)
             if len(commonRoles) == 1:
-                print(f"\nTold {ctx.author.name} their bending type.")
+                print(f"\nTold {ctx.author} their bending type.")
                 return f"You are a {commonRoles[0]}."
 
             elif len(commonRoles) == 0:
@@ -49,7 +50,7 @@ class MembersCog(commands.Cog):
             for role in ctx.author.roles:
                 if role.name in reactions.keys():
                     await ctx.author.remove_roles(role)
-                    print(f"\n{ctx.author.name} is not a {role.name} anymore.")
+                    print(f"\n{ctx.author} is not a {role.name} anymore.")
                     return f"You're not a {role.name} anymore."
             else:
                 return "You already aren't a bender."
@@ -112,13 +113,14 @@ class MembersCog(commands.Cog):
     @commands.group(name="role", help="Role related functions")
     async def role(self, ctx):
         if ctx.invoked_subcommand is None:
-            view = self.Role(ctx)
-            await ctx.send("Zhu-Li, do the thing!", view=view)
+            view = self.RoleView(ctx)
+            viewMsg = await ctx.send("Zhu-Li, do the thing!", view=view)
             await view.wait()
 
-            if view.chosen_func == None:
-                print("Role Buttons timed out...")
+            if not view.chosen_func:
+                print(f'Role view sent for {ctx.author} expired.')
                 await ctx.message.delete()
+                await viewMsg.delete()
 
     # this waits for a reaction to be added to our addRoleEmbed
     @commands.Cog.listener("on_raw_reaction_add")

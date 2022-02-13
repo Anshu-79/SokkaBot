@@ -17,13 +17,13 @@ class CommonCog(commands.Cog):
         await ctx.send(
             f"Pong! I'm alive.\nLatency = {round(self.bot.latency * 1000, 3)} ms"
         )
-        print(f"Told {ctx.author.name} that I'm alive.")
+        print(f"Told {ctx.author} that I'm alive.")
 
     @commands.command(name="hello", help="Says hello")
     @commands.guild_only()
     async def say_hello(self, ctx):
-        await ctx.reply(f"Hello, {ctx.author.name}! Sokka, the boomerang guy here.")
-        print(f"\nSaid hello to {ctx.author.name}.")
+        await ctx.reply(f"Hello, {ctx.author}! Sokka, the boomerang guy here.")
+        print(f"\nSaid hello to {ctx.author}.")
 
     @commands.command(name="joke", help="Tells you a joke")
     async def tell_joke(self, ctx):
@@ -33,13 +33,13 @@ class CommonCog(commands.Cog):
 
             if "joke" in json_data.keys():
                 await ctx.reply(json_data["joke"])
-                print(f"\nTold a one-part joke to {ctx.author.name}.")
+                print(f"\nTold a one-part joke to {ctx.author}.")
 
             if "setup" and "delivery" in json_data.keys():
                 await ctx.reply(json_data["setup"])
                 time.sleep(1)
                 await ctx.reply(json_data["delivery"])
-                print(f"\nTold a two-part joke to {ctx.author.name}.")
+                print(f"\nTold a two-part joke to {ctx.author}.")
 
     @commands.Cog.listener("on_message")
     async def send_gif(self, ctx):
@@ -58,7 +58,7 @@ class CommonCog(commands.Cog):
                 else:
                     await ctx.reply(file=gif_file)
                 print(
-                    f"\nReacted with the {gif_title} GIF to {ctx.author.name}'s message."
+                    f"\nReacted with the {gif_title} GIF to {ctx.author}'s message."
                 )
 
 
