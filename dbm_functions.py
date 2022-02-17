@@ -10,13 +10,14 @@ async def to_binary(file_path):
 # note that the order of elements of headers & row has to be the same
 async def inserter(table_name: str, headers: tuple, row: tuple):
     try:
-        async with aiosqlite.connect("sokka_dtbs.db") as db:
-            await db.execute(f"INSERT INTO {table_name}{headers} VALUES {row}")
-            await db.commit()
-            print(f"\nInserted {row} in {table_name}")
+        if len(headers) == len(row):
+            async with aiosqlite.connect("sokka_dtbs.db") as db:
+                await db.execute(f"INSERT INTO {table_name}{headers} VALUES {row}")
+                await db.commit()
+                print(f"\nInserted {row} in {table_name}")
 
-    except len(headers) != len(row):
-        print("Incorrect input. Ensure same number of inputs in headers & row.")
+        else:
+            print("Incorrect input. Ensure same number of inputs in headers & row.")
 
     except (sqlite3.OperationalError, sqlite3.IntegrityError) as exc:
         print(exc)

@@ -25,7 +25,6 @@ class MembersCog(commands.Cog):
             self.chosen_func = None
             self.ctx = ctx
 
-
         def get_roles(self, ctx):
             ourRoles = set(reactions.keys())
             userRoles = set([role.name for role in ctx.author.roles])
@@ -118,7 +117,7 @@ class MembersCog(commands.Cog):
             await view.wait()
 
             if not view.chosen_func:
-                print(f'Role view sent for {ctx.author} expired.')
+                print(f"Role view sent for {ctx.author} expired.")
                 await ctx.message.delete()
                 await viewMsg.delete()
 

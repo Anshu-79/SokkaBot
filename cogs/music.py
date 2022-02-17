@@ -305,9 +305,7 @@ class MusicCog(commands.Cog):
                     message = await ctx.send("", embed=video.get_embed())
                     await self._add_reaction_controls(message)
                     logging.info(f"Now playing '{video.title}'")
-                    print(
-                        f"\nNow playing '{video.title}' requested by {ctx.author}"
-                    )
+                    print(f"\nNow playing '{video.title}' requested by {ctx.author}")
                 else:
                     await ctx.send("You need to be in a voice channel to do that.")
                     raise commands.CommandError(

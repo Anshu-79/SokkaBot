@@ -6,6 +6,7 @@ import pytz
 import uuid
 
 import globals
+from mod_functions.data_check import data_check
 from mod_functions.export_to_JSON import save_data
 from mod_functions.import_from_JSON import get_data
 from mod_functions import remove_announcement
@@ -13,6 +14,7 @@ from mod_functions.min_time_dict import minTimeDict
 from mod_functions.ticket_id_functions import getDictByTicketID
 from mod_functions.ticket_id_functions import updateDictByTicketID
 from mod_functions.text_to_timestamp import text_2_timestamp
+from mod_functions.sch_database_functions import insert
 
 
 class ModCog(commands.Cog):
@@ -21,6 +23,13 @@ class ModCog(commands.Cog):
         self.tz = pytz.timezone("Asia/Kolkata")
         self.time_format = "%d-%m-%Y %H:%M:%S"
         self.__doc__ = "Module with commands for mods"
+
+    def get_channel_list(self):
+        text_channel_list = []
+        for server in self.bot.guilds:
+            for channel in server.channels:
+                if str(channel.type) == "text":
+                    text_channel_list.append(channel)
 
     def is_admin(self, ctx):
         permissions = ctx.channel.permissions_for(ctx.author)
@@ -33,14 +42,92 @@ class ModCog(commands.Cog):
             return False
 
     class ScheduleView(disnake.ui.View):
-        def __init__(self, ctx):
+        def __init__(self, ctx, channel_list):
             super().__init__()
             self.subcommand = None
             self.ctx = ctx
+            self.channel_list = channel_list
+
+        class NewMsgForm(disnake.ui.Modal):
+            def __init__(self, channel_list):
+                self.channel_list = channel_list
+                components = [
+                    disnake.ui.TextInput(
+                        label="Channel Name",
+                        custom_id="channel name",
+                        placeholder="Scheduled message's destination channel",
+                        style=disnake.TextInputStyle.short,
+                        max_length=100,
+                        required=True,
+                    ),
+                    disnake.ui.TextInput(
+                        label="Date",
+                        custom_id="date",
+                        placeholder="DD-MM-YYYY",
+                        style=disnake.TextInputStyle.short,
+                        min_length=10,
+                        max_length=10,
+                        required=True,
+                    ),
+                    disnake.ui.TextInput(
+                        label="Time",
+                        custom_id="time",
+                        placeholder="HH:MM:SS",
+                        style=disnake.TextInputStyle.short,
+                        min_length=8,
+                        max_length=8,
+                        required=True,
+                    ),
+                    disnake.ui.TextInput(
+                        label="Your Message",
+                        custom_id="message",
+                        placeholder="Type your message here",
+                        style=disnake.TextInputStyle.long,
+                        min_length=1,
+                        max_length=2000,
+                        required=True,
+                    ),
+                ]
+                super().__init__(
+                    title="Schedule New Message",
+                    custom_id="schNewMsg",
+                    components=components,
+                )
+
+            async def callback(self, inter):
+                embed = disnake.Embed(title="The below data was saved.")
+                keys = [pair[0] for pair in inter.text_values.items()]
+                vals = [pair[1] for pair in inter.text_values.items()]
+                data = dict(zip(keys, vals))
+
+                
+                data['guild_name'] = disnake.utils.get(inter.client.guilds, id=inter.guild_id).name
+
+                if data_check(data, self.channel_list):
+                    for key, value in inter.text_values.items():
+                        embed.add_field(
+                            name=key.capitalize(), value=value, inline=False
+                        )
+                    
+                    ticket_id = uuid.uuid4().fields[1]
+                    data['ticket_id'] = ticket_id
+                    embed.add_field(
+                        name='Ticket ID', value=ticket_id, inline=False
+                    )
+                    embed.set_footer(text='--Remember your Ticket ID--')
+                    await insert(data)
+
+                    await inter.response.send_message(embed=embed, ephemeral=True)
+                    
+                else:
+                    await inter.response.send_message(
+                        "Unexpected input. Please try again.", ephemeral=True
+                    )
 
         @disnake.ui.button(label="New", style=disnake.ButtonStyle.green)
-        async def new(self, button, interaction):
-            pass
+        async def new(self, button, inter):
+            self.subcommand = "New"
+            await inter.response.send_modal(self.NewMsgForm(self.channel_list))
 
         @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.blurple)
         async def edit(self, button, interaction):
@@ -49,8 +136,6 @@ class ModCog(commands.Cog):
         @disnake.ui.button(label="Delete", style=disnake.ButtonStyle.red)
         async def delete(self, button, interaction):
             pass
-
-    
 
     @commands.has_permissions(administrator=True)
     @commands.command(name="purge", help="Deletes a specific number of messages")
@@ -63,24 +148,20 @@ class ModCog(commands.Cog):
         if minTimeDict() != None:
             self.checkTime.start(minTimeDict())
 
-    
     @commands.group(
         name="sch", aliases=["schedule"], help="Message scheduling related commands"
     )
     @commands.guild_only()
     async def sch(self, ctx):
         if ctx.invoked_subcommand is None:
+            text_channel_list = [
+                channel.name
+                for channel in ctx.guild.channels
+                if str(channel.type) == "text"
+            ]
+
             await ctx.send(
-                """
-$sch msg = To enter the date, time, place & text of announcement
-    Syntax: $sch msg <name of channel> DD-MM-YYYY HH:MM:SS <your text of announcement>\nPS: Use 24-hr format\n\n
-$sch edit = To edit a pre-scheduled message
-    Syntax: $sch edit <ticket ID>
-    {<Whichever entry you want to edit>}
-    For eg: {"text": "<New text>",
-            "channel": "<New channel>"} 
-    PS: The curly braces and quotes are important
-  """
+                "Make the choice, Neo.", view=self.ScheduleView(ctx, text_channel_list)
             )
 
     @sch.command()
