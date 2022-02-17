@@ -50,12 +50,12 @@ class SokkaBot(commands.Bot):
             print(f"{cog} was loaded.")
 
     async def on_ready(self):
-        print(f"\nLogged in as: {bot.user.name} - {bot.user.id}\n")
+        print(f"\nLogged in as: {bot.user.name} - {bot.user.id}")
 
         # loop = asyncio.get_event_loop()
         # await loop.run_until_complete(inserter)
 
-        print("I'm ready to chat!\n")
+        print("\nI'm ready to chat!")
 
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
