@@ -1,9 +1,10 @@
 from datetime import datetime
-import pytz
+
+from globals import general
+
+tz = general["tz"]
+tf = general["tf"]
 
 
-def text_2_timestamp(text):
-    tz = pytz.timezone("Asia/Kolkata")
-    tf = "%d-%m-%Y %H:%M:%S"
-
+def t2t(text):
     return tz.localize(datetime.strptime(text, tf)).timestamp()

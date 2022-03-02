@@ -8,7 +8,7 @@ async def to_binary(file_path):
 
 
 # note that the order of elements of headers & row has to be the same
-async def inserter(table_name: str, headers: tuple, row: tuple):
+async def inserter(table_name: str, headers: tuple, row: tuple) -> None:
     try:
         if len(headers) == len(row):
             async with aiosqlite.connect("sokka_dtbs.db") as db:
@@ -23,7 +23,7 @@ async def inserter(table_name: str, headers: tuple, row: tuple):
         print(exc)
 
 
-async def deleter(table_name: str, primary_key: int):
+async def deleter(table_name: str, primary_key: int) -> None:
     async with aiosqlite.connect("sokka_dtbs.db") as db:
         try:
             table_info = await db.execute(f"PRAGMA table_info({table_name});")
@@ -42,7 +42,11 @@ async def deleter(table_name: str, primary_key: int):
             print(exc)
 
 
-async def reader(table_name: str, columns: tuple = "*"):
+async def reader(**kwargs) -> list:
+    table_name = kwargs["table"]
+    columns = kwargs["columns"] if "columns" in kwargs.keys() else "*"
+    order_by = kwargs["order_by"] if "order_by" in kwargs.keys() else None
+
     columns = [
         str(i) + ", " if columns.index(i) + 1 != len(columns) else str(i)
         for i in columns
@@ -50,7 +54,12 @@ async def reader(table_name: str, columns: tuple = "*"):
     columns = "".join(columns)
     async with aiosqlite.connect("sokka_dtbs.db") as db:
         try:
-            query = await db.execute(f"SELECT {columns} FROM {table_name};")
+            if not order_by:
+                query = await db.execute(f"SELECT {columns} FROM {table_name};")
+            elif order_by:
+                query = await db.execute(
+                    f"SELECT {columns} FROM {table_name} ORDER BY {order_by};"
+                )
             data = await query.fetchall()
 
             return data

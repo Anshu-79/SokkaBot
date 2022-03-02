@@ -1,8 +1,9 @@
 from datetime import datetime
-import pytz
 
-tz = pytz.timezone("Asia/Kolkata")
-tf = "%d-%m-%Y%H:%M:%S"
+from globals import general
+
+tz = general["tz"]
+tf = general["tf"]
 
 
 def data_check(data: dict, channel_list: list) -> bool:

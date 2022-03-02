@@ -60,7 +60,7 @@ class SokkaBot(commands.Bot):
         print(f"\nLogged in as: {bot.user.name} - {bot.user.id}")
 
         # loop = asyncio.get_event_loop()
-        # await loop.run_until_complete(inserter)
+        # await loop.run_until_complete(reader)
 
         print("\nI'm ready to chat!")
 

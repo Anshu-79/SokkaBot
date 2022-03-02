@@ -1,11 +1,15 @@
 import disnake
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 
 
 class TestCog(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.__doc__ == "Commands that are currently under development"
+
+    @tasks.loop(seconds=1)
+    async def printer(self, word):
+        print(word)
 
     class MyView(disnake.ui.View):
         def __init__(self):
@@ -29,6 +33,7 @@ class TestCog(commands.Cog):
                 for key, value in inter.text_values.items():
                     embed.add_field(name=key.capitalize(), value=value, inline=False)
                 await inter.response.send_message(embed=embed)
+                # self.printer.start('hello!')
 
         @disnake.ui.button(label="Do", style=disnake.ButtonStyle.success)
         async def btn(self, button, interaction):
