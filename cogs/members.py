@@ -14,84 +14,85 @@ reactions = {
 }
 
 
+class RoleView(disnake.ui.View):
+    def __init__(self, ctx):
+        super().__init__(timeout=60.0)
+        self.chosen_func = None
+        self.ctx = ctx
+
+    def get_roles(self, ctx):
+        ourRoles = set(reactions.keys())
+        userRoles = set([role.name for role in ctx.author.roles])
+        commonRoles = ourRoles.intersection(userRoles)
+        return list(commonRoles)
+
+    async def show_func(self, ctx):
+        commonRoles = self.get_roles(ctx)
+        if len(commonRoles) == 1:
+            print(f"\nTold {ctx.author} their bending type.")
+            return f"You are a {commonRoles[0]}."
+
+        elif len(commonRoles) == 0:
+            return "You're not a Bender currently."
+
+        elif len(commonRoles) > 1:
+            return "Wait... How can you bend 2 elements?! Please contact Anshu79#2928."
+
+    async def remove_func(self, ctx):
+        for role in ctx.author.roles:
+            if role.name in reactions.keys():
+                await ctx.author.remove_roles(role)
+                print(f"\n{ctx.author} is not a {role.name} anymore.")
+                return f"You're not a {role.name} anymore."
+        else:
+            return "You already aren't a bender."
+
+    async def add_func(self, ctx):
+        if len(self.get_roles(ctx)) == 0:
+
+            addRoleEmbed = disnake.Embed(
+                title="Choose Your Bending!", colour=ctx.author.color
+            )
+            addRoleEmbed.set_image(url=addRoleEmbedURL)
+
+            add_role_message = await ctx.send(embed=addRoleEmbed)
+
+            for reaction in reactions:
+                await add_role_message.add_reaction(reactions[reaction])
+
+            return "Add a reaction to the above message :arrow_up:"
+
+        else:
+            return (
+                "You're already a Bender.\nOnly the Avatar can master all 4 elements."
+            )
+
+    @disnake.ui.button(label="Show Role", style=disnake.ButtonStyle.blurple)
+    async def show(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        self.chosen_func = "show"
+        role = await self.show_func(self.ctx)
+        await interaction.response.send_message(role, ephemeral=True)
+
+    @disnake.ui.button(label="Add Role", style=disnake.ButtonStyle.green)
+    async def add(self, button, interaction):
+        self.chosen_func = "add"
+        add_return = await self.add_func(self.ctx)
+
+        await interaction.response.send_message(add_return, ephemeral=True)
+
+    @disnake.ui.button(label="Remove Role", style=disnake.ButtonStyle.red)
+    async def remove(self, button, interaction):
+        self.chosen_func = "remove"
+        removal_msg = await self.remove_func(self.ctx)
+        await interaction.response.send_message(removal_msg, ephemeral=True)
+
+
 class MembersCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.__doc__ = "Module with members-related commands"
-
-    class RoleView(disnake.ui.View):
-        def __init__(self, ctx):
-            super().__init__(timeout=60.0)
-            self.chosen_func = None
-            self.ctx = ctx
-
-        def get_roles(self, ctx):
-            ourRoles = set(reactions.keys())
-            userRoles = set([role.name for role in ctx.author.roles])
-            commonRoles = ourRoles.intersection(userRoles)
-            return list(commonRoles)
-
-        async def show_func(self, ctx):
-            commonRoles = self.get_roles(ctx)
-            if len(commonRoles) == 1:
-                print(f"\nTold {ctx.author} their bending type.")
-                return f"You are a {commonRoles[0]}."
-
-            elif len(commonRoles) == 0:
-                return "You're not a Bender currently."
-
-            elif len(commonRoles) > 1:
-                return (
-                    "Wait... How can you bend 2 elements?! Please contact Anshu79#2928."
-                )
-
-        async def remove_func(self, ctx):
-            for role in ctx.author.roles:
-                if role.name in reactions.keys():
-                    await ctx.author.remove_roles(role)
-                    print(f"\n{ctx.author} is not a {role.name} anymore.")
-                    return f"You're not a {role.name} anymore."
-            else:
-                return "You already aren't a bender."
-
-        async def add_func(self, ctx):
-            if len(self.get_roles(ctx)) == 0:
-
-                addRoleEmbed = disnake.Embed(
-                    title="Choose Your Bending!", colour=ctx.author.color
-                )
-                addRoleEmbed.set_image(url=addRoleEmbedURL)
-
-                add_role_message = await ctx.send(embed=addRoleEmbed)
-
-                for reaction in reactions:
-                    await add_role_message.add_reaction(reactions[reaction])
-
-                return "Add a reaction to the above message :arrow_up:"
-
-            else:
-                return "You're already a Bender.\nOnly the Avatar can master all 4 elements."
-
-        @disnake.ui.button(label="Show Role", style=disnake.ButtonStyle.blurple)
-        async def show(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-        ):
-            self.chosen_func = "show"
-            role = await self.show_func(self.ctx)
-            await interaction.response.send_message(role, ephemeral=True)
-
-        @disnake.ui.button(label="Add Role", style=disnake.ButtonStyle.green)
-        async def add(self, button, interaction):
-            self.chosen_func = "add"
-            add_return = await self.add_func(self.ctx)
-
-            await interaction.response.send_message(add_return, ephemeral=True)
-
-        @disnake.ui.button(label="Remove Role", style=disnake.ButtonStyle.red)
-        async def remove(self, button, interaction):
-            self.chosen_func = "remove"
-            removal_msg = await self.remove_func(self.ctx)
-            await interaction.response.send_message(removal_msg, ephemeral=True)
 
     def get_commons(self, member):
         memberRoles = [role.name for role in member.roles]
@@ -112,7 +113,7 @@ class MembersCog(commands.Cog):
     @commands.group(name="role", help="Role related functions")
     async def role(self, ctx):
         if ctx.invoked_subcommand is None:
-            view = self.RoleView(ctx)
+            view = RoleView(ctx)
             viewMsg = await ctx.send("Zhu-Li, do the thing!", view=view)
             await view.wait()
 
