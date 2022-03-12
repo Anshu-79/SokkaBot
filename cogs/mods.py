@@ -265,18 +265,7 @@ class ModCog(commands.Cog):
         self.bot = bot
         self.__doc__ = "Module with commands for mods"
 
-    def is_admin(self, ctx):
-        permissions = ctx.channel.permissions_for(ctx.author)
-        mods = [
-            i["mods"]
-            for i in globals.server_dict
-            if i["name"] == ctx.message.guild.name
-        ]
-        if permissions.administrator or ctx.author in mods:
-            return True
-        else:
-            return False
-
+    
     @commands.Cog.listener("on_ready")
     async def on_ready(self):
         self.checkTime.start()
@@ -288,20 +277,20 @@ class ModCog(commands.Cog):
         await ctx.channel.purge(limit=number)
         print(f"Purged {number} messages in {ctx.channel.name}")
 
+    @commands.has_permissions(administrator=True)
     @commands.group(
         name="sch", aliases=["schedule"], help="Message scheduling related commands"
     )
     @commands.guild_only()
     async def sch(self, ctx):
-        if self.is_admin(ctx):
-            if ctx.invoked_subcommand is None:
+        if ctx.invoked_subcommand is None:
 
-                # We're passing the checkTime loop to the View because
-                # NewMsgForm needs to manage it too
-                await ctx.send(
-                    "Make the choice Neo.",
-                    view=ScheduleView(self.checkTime),
-                )
+            # We're passing the checkTime loop to the View because
+            # NewMsgForm needs to manage it too
+            await ctx.send(
+                "Make the choice Neo.",
+                view=ScheduleView(self.checkTime),
+            )
 
     @disnake.ext.tasks.loop(seconds=1)
     async def checkTime(self):
