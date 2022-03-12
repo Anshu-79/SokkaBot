@@ -28,14 +28,8 @@ def fancy_traceback(exc: Exception) -> str:
     return f"```py\n{text[-512:]}\n```"
 
 
-cogs = [
-    "cogs.mods",
-    "cogs.common",
-    "cogs.members",
-    "cogs.music",
-    "cogs.help",
-    "cogs.test",
-]
+cogs = os.listdir("cogs")
+cogs = ["cogs." + file.split(".")[0] for file in cogs if file.endswith(".py")]
 
 intents = disnake.Intents.default()
 intents.members = True

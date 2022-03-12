@@ -8,11 +8,11 @@ clm_headers = ("channel", "datetime", "message", "guild", "ticket_id", "author")
 async def insert(input_data: dict) -> None:
 
     data = (
-        input_data["channel name"],
+        input_data["channel"],
         input_data["date"] + input_data["time"],
         input_data["message"],
-        input_data["guild_name"],
-        input_data["ticket_id"],
+        input_data["guild"],
+        input_data["ticket"],
         input_data["author"],
     )
 
@@ -27,6 +27,6 @@ async def reader() -> list:
     return data
 
 
-async def remover(ticket_id) -> None:
+async def remover(ticket_id: int) -> None:
 
     await dbm.deleter("announcements", ticket_id)

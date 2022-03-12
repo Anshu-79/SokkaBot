@@ -16,7 +16,7 @@ reactions = {
 
 class RoleView(disnake.ui.View):
     def __init__(self, ctx):
-        super().__init__(timeout=60.0)
+        super().__init__(timeout=300.0)
         self.chosen_func = None
         self.ctx = ctx
 

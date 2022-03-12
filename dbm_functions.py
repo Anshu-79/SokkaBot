@@ -20,7 +20,7 @@ async def inserter(table_name: str, headers: tuple, row: tuple) -> None:
             print("Incorrect input. Ensure same number of inputs in headers & row.")
 
     except (sqlite3.OperationalError, sqlite3.IntegrityError) as exc:
-        print(exc)
+        print(f"SQL error: {exc}")
 
 
 async def deleter(table_name: str, primary_key: int) -> None:
@@ -39,13 +39,13 @@ async def deleter(table_name: str, primary_key: int) -> None:
             print(f"\nDeleted row with Primary Key = {primary_key} from {table_name}")
 
         except sqlite3.OperationalError as exc:
-            print(exc)
+            print(f"SQL error: {exc}")
 
 
 async def reader(**kwargs) -> list:
-    table_name = kwargs["table"]
-    columns = kwargs["columns"] if "columns" in kwargs.keys() else "*"
-    order_by = kwargs["order_by"] if "order_by" in kwargs.keys() else None
+    table_name: str = kwargs["table"]
+    columns: tuple = kwargs["columns"] if "columns" in kwargs.keys() else "*"
+    order_by: str = kwargs["order_by"] if "order_by" in kwargs.keys() else None
 
     columns = [
         str(i) + ", " if columns.index(i) + 1 != len(columns) else str(i)
@@ -65,4 +65,25 @@ async def reader(**kwargs) -> list:
             return data
 
         except sqlite3.OperationalError as exc:
-            print(exc)
+            print(f"SQL error: {exc}")
+
+
+async def updater(**kwargs) -> None:
+    table: str = kwargs["table"]
+    news: dict = kwargs["new_vals"]
+    conditions: str = kwargs["conditions"]
+
+    news_str = ""
+    for key in news:
+        news_str += f"""{key} = "{news[key]}","""
+    news_str = news_str[:-1]
+
+    async with aiosqlite.connect("sokka_dtbs.db") as db:
+        try:
+            await db.execute(f"UPDATE {table} SET {news_str} WHERE {conditions};")
+
+            await db.commit()
+            print(f"\nUpdated {tuple(news.keys())} columns in {table}")
+
+        except sqlite3.OperationalError as exc:
+            print(f"SQL error: {exc}")
