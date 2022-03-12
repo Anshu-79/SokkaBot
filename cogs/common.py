@@ -57,9 +57,7 @@ class CommonCog(commands.Cog):
                     await ctx.reply(embed=embed)
                 else:
                     await ctx.reply(file=gif_file)
-                print(
-                    f"\nReacted with the {gif_title} GIF to {ctx.author}'s message."
-                )
+                print(f"\nReacted with the {gif_title} GIF to {ctx.author}'s message.")
 
 
 def setup(bot):

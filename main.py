@@ -28,7 +28,8 @@ def fancy_traceback(exc: Exception) -> str:
     return f"```py\n{text[-512:]}\n```"
 
 
-cogs = ["cogs.mods", "cogs.common", "cogs.members", "cogs.music", "cogs.help"]
+cogs = os.listdir("cogs")
+cogs = ["cogs." + file.split(".")[0] for file in cogs if file.endswith(".py")]
 
 intents = disnake.Intents.default()
 intents.members = True
@@ -53,7 +54,7 @@ class SokkaBot(commands.Bot):
         print(f"\nLogged in as: {bot.user.name} - {bot.user.id}")
 
         # loop = asyncio.get_event_loop()
-        # await loop.run_until_complete(inserter)
+        # await loop.run_until_complete(reader)
 
         print("\nI'm ready to chat!")
 

@@ -8,21 +8,22 @@ async def to_binary(file_path):
 
 
 # note that the order of elements of headers & row has to be the same
-async def inserter(table_name: str, headers: tuple, row: tuple):
+async def inserter(table_name: str, headers: tuple, row: tuple) -> None:
     try:
-        async with aiosqlite.connect("sokka_dtbs.db") as db:
-            await db.execute(f"INSERT INTO {table_name}{headers} VALUES {row}")
-            await db.commit()
-            print(f"\nInserted {row} in {table_name}")
+        if len(headers) == len(row):
+            async with aiosqlite.connect("sokka_dtbs.db") as db:
+                await db.execute(f"INSERT INTO {table_name}{headers} VALUES {row}")
+                await db.commit()
+                print(f"\nInserted {row} in {table_name}")
 
-    except len(headers) != len(row):
-        print("Incorrect input. Ensure same number of inputs in headers & row.")
+        else:
+            print("Incorrect input. Ensure same number of inputs in headers & row.")
 
     except (sqlite3.OperationalError, sqlite3.IntegrityError) as exc:
-        print(exc)
+        print(f"SQL error: {exc}")
 
 
-async def deleter(table_name: str, primary_key: int):
+async def deleter(table_name: str, primary_key: int) -> None:
     async with aiosqlite.connect("sokka_dtbs.db") as db:
         try:
             table_info = await db.execute(f"PRAGMA table_info({table_name});")
@@ -38,10 +39,14 @@ async def deleter(table_name: str, primary_key: int):
             print(f"\nDeleted row with Primary Key = {primary_key} from {table_name}")
 
         except sqlite3.OperationalError as exc:
-            print(exc)
+            print(f"SQL error: {exc}")
 
 
-async def reader(table_name: str, columns: tuple = "*"):
+async def reader(**kwargs) -> list:
+    table_name: str = kwargs["table"]
+    columns: tuple = kwargs["columns"] if "columns" in kwargs.keys() else "*"
+    order_by: str = kwargs["order_by"] if "order_by" in kwargs.keys() else None
+
     columns = [
         str(i) + ", " if columns.index(i) + 1 != len(columns) else str(i)
         for i in columns
@@ -49,10 +54,36 @@ async def reader(table_name: str, columns: tuple = "*"):
     columns = "".join(columns)
     async with aiosqlite.connect("sokka_dtbs.db") as db:
         try:
-            query = await db.execute(f"SELECT {columns} FROM {table_name};")
+            if not order_by:
+                query = await db.execute(f"SELECT {columns} FROM {table_name};")
+            elif order_by:
+                query = await db.execute(
+                    f"SELECT {columns} FROM {table_name} ORDER BY {order_by};"
+                )
             data = await query.fetchall()
 
             return data
 
         except sqlite3.OperationalError as exc:
-            print(exc)
+            print(f"SQL error: {exc}")
+
+
+async def updater(**kwargs) -> None:
+    table: str = kwargs["table"]
+    news: dict = kwargs["new_vals"]
+    conditions: str = kwargs["conditions"]
+
+    news_str = ""
+    for key in news:
+        news_str += f"""{key} = "{news[key]}","""
+    news_str = news_str[:-1]
+
+    async with aiosqlite.connect("sokka_dtbs.db") as db:
+        try:
+            await db.execute(f"UPDATE {table} SET {news_str} WHERE {conditions};")
+
+            await db.commit()
+            print(f"\nUpdated {tuple(news.keys())} columns in {table}")
+
+        except sqlite3.OperationalError as exc:
+            print(f"SQL error: {exc}")
