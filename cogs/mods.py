@@ -268,7 +268,9 @@ class ModCog(commands.Cog):
     def is_admin(self, ctx):
         permissions = ctx.channel.permissions_for(ctx.author)
         mods = [
-            i["mods"] for i in globals.server_dict if i["id"] == ctx.message.guild.id
+            i["mods"]
+            for i in globals.server_dict
+            if i["name"] == ctx.message.guild.name
         ]
         if permissions.administrator or ctx.author in mods:
             return True
