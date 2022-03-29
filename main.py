@@ -1,10 +1,23 @@
 import disnake
 from disnake.ext import commands
+import logging
 import os
+from sty import fg
+import traceback
 
 from keep_alive import keep_alive
 
-import traceback
+# Setting up logging
+disnakeLogger = logging.getLogger("disnake")
+disnakeLogger.propagate = False
+disnakeLogger.setLevel(logging.INFO)
+
+streamHandler = logging.StreamHandler()
+formatter = logging.Formatter(fg(241, 211, 2) + "%(message)s" + fg.rs)
+
+streamHandler.setFormatter(formatter)
+disnakeLogger.addHandler(streamHandler)
+
 
 hal_url = os.environ["halURL"]
 
@@ -45,18 +58,18 @@ class SokkaBot(commands.Bot):
         )
 
     def load_all_extensions(self, cogs_list):
-        print("Loading cogs...\n")
+        disnakeLogger.info("Loading cogs...\n")
         for cog in cogs_list:
             self.load_extension(cog)
-            print(f"{cog} was loaded.")
+            disnakeLogger.info(f"{cog} was loaded.")
 
     async def on_ready(self):
-        print(f"\nLogged in as: {bot.user.name} - {bot.user.id}")
+        disnakeLogger.info(f"\nLogged in as: {bot.user.name} - {bot.user.id}")
 
         # loop = asyncio.get_event_loop()
         # await loop.run_until_complete(reader)
 
-        print("\nI'm ready to chat!")
+        disnakeLogger.info("\nI'm ready to chat!")
 
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
@@ -74,7 +87,7 @@ bot = SokkaBot()
 bot.remove_command("help")
 bot.load_all_extensions(cogs)
 
-print(f"disnake: {disnake.__version__}\n")
+disnakeLogger.info(f"disnake: {disnake.__version__}\n")
 
 keep_alive()
 

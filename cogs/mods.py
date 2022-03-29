@@ -3,9 +3,12 @@ from datetime import datetime
 import disnake
 from disnake.ext import commands, tasks
 from disnake.utils import get
+import logging
 
 import globals
+from logger import logger
 import dbm_functions as dbm
+from loggers import infoLogger
 from mod_functions.data_check import data_check
 from mod_functions.form_components import formComponents
 from mod_functions.sch_database_functions import insert, reader, remover
@@ -70,7 +73,7 @@ class NewMsgForm(disnake.ui.Modal):
             embed.set_footer(text="--Remember your Ticket ID--")
             await insert(data)
 
-            print(
+            infoLogger.info(
                 f"\nAn announcement was scheduled for {data['date']} {data['time']} in {data['channel']} ({data['guild']}) by {inter.author}"
             )
             # A temporary embed is sent to the user
@@ -82,7 +85,7 @@ class NewMsgForm(disnake.ui.Modal):
             # and loop wasn't running
             if not self.checkTime.is_running():
                 self.checkTime.start()
-                print("\nThe checkTime loop has started.")
+                infoLogger.info("\nThe checkTime loop has started.")
 
         else:
             await inter.response.send_message(
@@ -232,7 +235,7 @@ class DeleteMsgForm(disnake.ui.Modal):
                         content=f"Deleted message with Ticket ID = {ticket_id}",
                         ephemeral=True,
                     )
-                    print(f"\nDeleted message with Ticket ID = {ticket_id}")
+                    infoLogger.info(f"\nDeleted message with Ticket ID = {ticket_id}")
             else:
                 await inter.response.send_message(
                     f"You are not the maker of the announcement with Ticket ID = {ticket_id}"
@@ -265,17 +268,16 @@ class ModCog(commands.Cog):
         self.bot = bot
         self.__doc__ = "Module with commands for mods"
 
-    
     @commands.Cog.listener("on_ready")
     async def on_ready(self):
         self.checkTime.start()
-        print("\nThe checkTime loop has started.")
+        infoLogger.info("\nThe checkTime loop has started.")
 
     @commands.has_permissions(administrator=True)
     @commands.command(name="purge", help="Deletes a specific number of messages")
     async def purge(self, ctx, number: int):
         await ctx.channel.purge(limit=number)
-        print(f"Purged {number} messages in {ctx.channel.name}")
+        infoLogger.info(f"Purged {number} messages in {ctx.channel.name}")
 
     @commands.has_permissions(administrator=True)
     @commands.group(
@@ -324,7 +326,7 @@ class ModCog(commands.Cog):
 
                 await channel.send(msg)
                 await author.send(f"Your message with Ticket ID {msgData[4]} was sent.")
-                print(
+                infoLogger.info(
                     f"\nAn announcement was made in {channel.name} ({msgData[3]}) at {msgData[1]} by {msgData[5]}"
                 )
 
@@ -335,12 +337,12 @@ class ModCog(commands.Cog):
                 # after popping out the first element
                 if len(data) == 0:
                     self.checkTime.stop()
-                    print("\nThe checkTime loop has exited.")
+                    infoLogger.info("\nThe checkTime loop has exited.")
 
         # Stops the loop if there's no message scheduled
         elif len(data) == 0:
             self.checkTime.stop()
-            print("\nThe checkTime loop has exited.")
+            infoLogger.info("\nThe checkTime loop has exited.")
 
 
 def setup(bot):

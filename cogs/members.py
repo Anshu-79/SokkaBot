@@ -3,6 +3,7 @@ from disnake.ext import commands
 import os
 
 # from functions.get_mod_func import get_mods
+from loggers import infoLogger
 
 addRoleEmbedURL = os.environ["addRoleURL"]
 
@@ -29,7 +30,7 @@ class RoleView(disnake.ui.View):
     async def show_func(self, ctx):
         commonRoles = self.get_roles(ctx)
         if len(commonRoles) == 1:
-            print(f"\nTold {ctx.author} their bending type.")
+            infoLogger.info(f"Told {ctx.author} their bending type.")
             return f"You are a {commonRoles[0]}."
 
         elif len(commonRoles) == 0:
@@ -42,7 +43,7 @@ class RoleView(disnake.ui.View):
         for role in ctx.author.roles:
             if role.name in reactions.keys():
                 await ctx.author.remove_roles(role)
-                print(f"\n{ctx.author} is not a {role.name} anymore.")
+                infoLogger.info(f"{ctx.author} is not a {role.name} anymore.")
                 return f"You're not a {role.name} anymore."
         else:
             return "You already aren't a bender."
@@ -118,7 +119,7 @@ class MembersCog(commands.Cog):
             await view.wait()
 
             if not view.chosen_func:
-                print(f"Role view sent for {ctx.author} expired.")
+                infoLogger.info(f"Role view sent for {ctx.author} expired.")
                 await ctx.message.delete()
                 await viewMsg.delete()
 
@@ -143,7 +144,9 @@ class MembersCog(commands.Cog):
                             if role is not None:
                                 if member is not None:
                                     await member.add_roles(role)
-                                    print(f"\n{member.name} is now a {role.name}")
+                                    infoLogger.info(
+                                        f"{member.name} is now a {role.name}"
+                                    )
                                     await message.delete()
                 else:
                     await member.send(

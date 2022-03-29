@@ -10,17 +10,20 @@ write_to_console = False
 text = "Hello! I'm SokkaBot, a Discord bot made with disnake."
 
 if not write_to_console:
-    getLogger('werkzeug').disabled = True
-    environ['WERKZEUG_RUN_MAIN'] = 'true'
+    getLogger("werkzeug").disabled = True
+    environ["WERKZEUG_RUN_MAIN"] = "true"
 
-app = Flask('')
+app = Flask("")
 
-@app.route('/')
+
+@app.route("/")
 def home():
     return text
 
+
 def run():
-  app.run(host='0.0.0.0',port=8080)
+    app.run(host="0.0.0.0", port=8080)
+
 
 def keep_alive():
     t = Thread(target=run)
