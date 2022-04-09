@@ -85,7 +85,7 @@ class NewMsgForm(disnake.ui.Modal):
             # and loop wasn't running
             if not self.checkTime.is_running():
                 self.checkTime.start()
-                infoLogger.info("\nThe checkTime loop has started.")
+                infoLogger.info("The checkTime loop has started.")
 
         else:
             await inter.response.send_message(
@@ -271,7 +271,7 @@ class ModCog(commands.Cog):
     @commands.Cog.listener("on_ready")
     async def on_ready(self):
         self.checkTime.start()
-        infoLogger.info("\nThe checkTime loop has started.")
+        infoLogger.info("The checkTime loop has started.")
 
     @commands.has_permissions(administrator=True)
     @commands.command(name="purge", help="Deletes a specific number of messages")
@@ -342,7 +342,7 @@ class ModCog(commands.Cog):
         # Stops the loop if there's no message scheduled
         elif len(data) == 0:
             self.checkTime.stop()
-            infoLogger.info("\nThe checkTime loop has exited.")
+            infoLogger.info("The checkTime loop has exited.")
 
 
 def setup(bot):

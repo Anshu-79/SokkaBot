@@ -13,11 +13,13 @@ disnakeLogger.propagate = False
 disnakeLogger.setLevel(logging.INFO)
 
 streamHandler = logging.StreamHandler()
-formatter = logging.Formatter(fg(241, 211, 2) + "%(message)s" + fg.rs)
+formatter = logging.Formatter(
+    fmt=fg(241, 211, 2) + "%(message)s" + fg.rs,
+    datefmt="%d-%m-%Y %H:%M:%S"
+)
 
 streamHandler.setFormatter(formatter)
 disnakeLogger.addHandler(streamHandler)
-
 
 hal_url = os.environ["halURL"]
 
