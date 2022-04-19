@@ -6,9 +6,8 @@ from disnake.utils import get
 import logging
 
 import globals
-from logger import logger
+from loggers import cmdLogger as infoLogger
 import dbm_functions as dbm
-from loggers import infoLogger
 from mod_functions.data_check import data_check
 from mod_functions.form_components import formComponents
 from mod_functions.sch_database_functions import insert, reader, remover

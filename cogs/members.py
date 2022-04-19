@@ -3,7 +3,7 @@ from disnake.ext import commands
 import os
 
 # from functions.get_mod_func import get_mods
-from loggers import infoLogger
+from loggers import cmdLogger as infoLogger
 
 addRoleEmbedURL = os.environ["addRoleURL"]
 

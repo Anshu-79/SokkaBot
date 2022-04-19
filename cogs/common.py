@@ -1,10 +1,10 @@
 import aiohttp
+import asyncio
 import disnake
 from disnake.ext import commands
-import time
 
 from common_functions.gif_function import get_gif
-from loggers import infoLogger
+from loggers import cmdLogger as infoLogger
 
 
 class CommonCog(commands.Cog):
@@ -32,13 +32,13 @@ class CommonCog(commands.Cog):
             request = await session.get(self.joke_api_request)
             json_data = await request.json()
 
-            if "joke" in json_data.keys():
+            if json_data['type'] == 'single':
                 await ctx.reply(json_data["joke"])
                 infoLogger.info(f"Told a one-part joke to {ctx.author}.")
 
-            if "setup" and "delivery" in json_data.keys():
+            if json_data['type'] == 'twopart':
                 await ctx.reply(json_data["setup"])
-                time.sleep(1)
+                await asyncio.sleep(1)
                 await ctx.reply(json_data["delivery"])
                 infoLogger.info(f"Told a two-part joke to {ctx.author}.")
 

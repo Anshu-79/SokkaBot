@@ -6,7 +6,7 @@ import math
 import youtube_dl
 
 from config import config as cfg
-from loggers import infoLogger
+from loggers import cmdLogger as infoLogger
 from music_functions.audio_configs import Video
 import music_functions.checks as checks
 
