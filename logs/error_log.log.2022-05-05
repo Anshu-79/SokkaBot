@@ -1,0 +1,14 @@
+
+WARNING:05-05-2022 15:17:16:
+Exception occured
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/bot_base.py", line 570, in invoke
+    await ctx.command.invoke(ctx)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 920, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 169, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "/home/runner/SokkaBotCode/cogs/music.py", line 316, in play
+    raise commands.CommandError(
+disnake.ext.commands.errors.CommandError: You need to be in a voice channel to do that.
+

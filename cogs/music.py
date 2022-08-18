@@ -1,12 +1,15 @@
 import asyncio
-from config import config as cfg
 from disnake.ext import commands
 import disnake
-from music_functions.audio_configs import Video
-import music_functions.checks as checks
 import logging
 import math
 import youtube_dl
+
+from config import config as cfg
+from loggers import cmdLogger as infoLogger
+from music_functions.audio_configs import Video
+import music_functions.checks as checks
+
 
 FFMPEG_BEFORE_OPTS = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
 
@@ -49,7 +52,7 @@ class MusicCog(commands.Cog):
             return True
 
         else:
-            print("Command sender is not song requester.")
+            infoLogger.info("Command sender is not song requester.")
             return False
 
     def _vote_skip(self, channel, member):
@@ -77,7 +80,7 @@ class MusicCog(commands.Cog):
             await client.disconnect()
             state.playlist = []
             state.now_playing = None
-            print(f"\n{ctx.author} stopped the music.")
+            infoLogger.info(f"{ctx.author} stopped the music.")
 
         else:
             await ctx.send("Not in a voice channel.")
@@ -91,7 +94,7 @@ class MusicCog(commands.Cog):
         if self.is_dj(ctx):
             client = ctx.guild.voice_client
             self._pause_audio(client)
-            print(f"\n{ctx.author} paused/played the music.")
+            infoLogger.info(f"{ctx.author} paused/played the music.")
 
     def _pause_audio(self, client):
         if client.is_paused():
@@ -121,7 +124,7 @@ class MusicCog(commands.Cog):
 
         state.volume = float(volume) / 100.0
         client.source.volume = state.volume
-        print(f"\n{ctx.author} changed the volume to {volume}")
+        infoLogger.info(f"{ctx.author} changed the volume to {volume}")
 
     @commands.command(
         aliases=["next"],
@@ -140,8 +143,8 @@ class MusicCog(commands.Cog):
         ):
             client.stop()
 
-            print(
-                f"\n{ctx.author} skipped {state.now_playing.title} as an admin/song requester."
+            infoLogger.info(
+                f"{ctx.author} skipped {state.now_playing.title} as an admin/song requester."
             )
             # skips if command sender is the requester or admin
 
@@ -163,8 +166,8 @@ class MusicCog(commands.Cog):
                 f"{ctx.author.mention} voted to skip. ({len(state.skip_votes)}/{required_votes} votes as of now)."
             )
 
-            print(
-                f"\n{ctx.author} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
+            infoLogger.info(
+                f"{ctx.author} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
             )
 
         else:
@@ -210,7 +213,7 @@ class MusicCog(commands.Cog):
         message = await ctx.send("", embed=state.now_playing.get_embed())
         # await message._add_reaction_controls(message)
         await self._add_reaction_controls(message)
-        print(f"\nTold {ctx.author} what's playing right now.")
+        infoLogger.info(f"Told {ctx.author} what's playing right now.")
 
     @commands.command(aliases=["q", "playlist"], help="Sends the current playlist")
     @commands.guild_only()
@@ -219,7 +222,7 @@ class MusicCog(commands.Cog):
         # Displays the current play queue.
         state = self.get_state(ctx.guild)
         await ctx.send(self._queue_text(state.playlist))
-        print(f"\n{ctx.author} saw the playlist.")
+        infoLogger.info(f"{ctx.author} saw the playlist.")
 
     def _queue_text(self, queue):
         # Returns a block of text describing a given song queue.
@@ -229,7 +232,7 @@ class MusicCog(commands.Cog):
                 f"{index+1}. **{song.title}** (requested by **{song.requested_by.name}**)"
                 for (index, song) in enumerate(queue)
             ]  # add individual songs
-            return "\n".join(message)
+            return "".join(message)
         else:
             return "The play queue is empty."
 
@@ -241,7 +244,7 @@ class MusicCog(commands.Cog):
         # Clears the play queue without leaving the channel
         state = self.get_state(ctx.guild)
         state.playlist = []
-        print(f"\n{ctx.author} cleared the playlist.")
+        infoLogger.info(f"{ctx.author} cleared the playlist.")
 
     @commands.command(
         aliases=["jq"],
@@ -261,8 +264,8 @@ class MusicCog(commands.Cog):
             state.playlist.insert(new_index - 1, song)  # and inserts it at new_index
 
             await ctx.send(self._queue_text(state.playlist))
-            print(
-                f"\n{ctx.author} moved {state.now_playing.title} from {old_index} to {new_index}"
+            infoLogger.info(
+                f"{ctx.author} moved {state.now_playing.title} from {old_index} to {new_index}"
             )
         else:
             await ctx.send("You must use a valid index.")
@@ -284,7 +287,7 @@ class MusicCog(commands.Cog):
                     await ctx.send("There was an error downloading your video, sorry.")
                     return
                 state.playlist.append(video)
-                print(f"\n{ctx.author} added '{video.title}' to the playlist")
+                infoLogger.info(f"{ctx.author} added '{video.title}' to the playlist")
                 message = await ctx.send("Added to queue.", embed=video.get_embed())
                 await self._add_reaction_controls(message)
             else:
@@ -305,7 +308,9 @@ class MusicCog(commands.Cog):
                     message = await ctx.send("", embed=video.get_embed())
                     await self._add_reaction_controls(message)
                     logging.info(f"Now playing '{video.title}'")
-                    print(f"\nNow playing '{video.title}' requested by {ctx.author}")
+                    infoLogger.info(
+                        f"Now playing '{video.title}' requested by {ctx.author}"
+                    )
                 else:
                     await ctx.send("You need to be in a voice channel to do that.")
                     raise commands.CommandError(
@@ -341,15 +346,15 @@ class MusicCog(commands.Cog):
                     if reaction.emoji == "\U000023ef":
                         # pause audio
                         self._pause_audio(client)
-                        print(
-                            f"\n{user.name} paused/resumed {state.now_playing.title} via reactions"
+                        infoLogger.info(
+                            f"{user.name} paused/resumed {state.now_playing.title} via reactions"
                         )
 
                     elif reaction.emoji == "\U000023ed":
                         # skip audio
                         client.stop()
-                        print(
-                            f"\n{user.name} skipped {state.now_playing.title} as an admin/song requester."
+                        infoLogger.info(
+                            f"{user.name} skipped {state.now_playing.title} as an admin/song requester."
                         )
 
                     elif reaction.emoji == "\U000023ee":
@@ -357,7 +362,9 @@ class MusicCog(commands.Cog):
                             0, state.now_playing
                         )  # insert current song at beginning of playlist
                         client.stop()  # skip ahead
-                        print(f"\n{user.name} replayed {state.now_playing.title}")
+                        infoLogger.info(
+                            f"{user.name} replayed {state.now_playing.title}"
+                        )
 
                 elif (
                     reaction.emoji == "\U000023ed"
@@ -382,8 +389,8 @@ class MusicCog(commands.Cog):
                     await channel.send(
                         f"{user.mention} voted to skip ({len(state.skip_votes)}/{required_votes} votes)"
                     )
-                    print(
-                        f"\n{user.name} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
+                    infoLogger.info(
+                        f"{user.name} voted to skip {state.now_playing.title}. {len(state.skip_votes)}/{required_votes} votes as of now)."
                     )
 
 

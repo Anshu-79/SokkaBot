@@ -25,7 +25,7 @@ class Video:
 
             get_thumbnail = lambda x: x[
                 -1
-            ]  # function to get the highest res thumbnail as it's always the last one...if
+            ]  # function to get the highest res thumbnail as it's always the last one...
             self.thumbnail = get_thumbnail(video["thumbnails"])["url"]
             # gets the url of thumbnail with get_thumbnail()
 

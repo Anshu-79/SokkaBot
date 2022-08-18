@@ -1,0 +1,46 @@
+
+WARNING:01-08-2022 13:00:18:
+Exception occured
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 169, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "/home/runner/SokkaBotCode/cogs/common.py", line 33, in tell_joke
+    json_data = await request.json()
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/aiohttp/client_reqrep.py", line 1103, in json
+    raise ContentTypeError(
+aiohttp.client_exceptions.ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky?blacklistFlags=nsfw,racist,sexist,explicit')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/bot_base.py", line 570, in invoke
+    await ctx.command.invoke(ctx)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 920, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 178, in wrapped
+    raise CommandInvokeError(exc) from exc
+disnake.ext.commands.errors.CommandInvokeError: Command raised an exception: ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky?blacklistFlags=nsfw,racist,sexist,explicit')
+
+
+WARNING:01-08-2022 13:00:32:
+Exception occured
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 169, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "/home/runner/SokkaBotCode/cogs/common.py", line 33, in tell_joke
+    json_data = await request.json()
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/aiohttp/client_reqrep.py", line 1103, in json
+    raise ContentTypeError(
+aiohttp.client_exceptions.ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky?blacklistFlags=nsfw,racist,sexist,explicit')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/bot_base.py", line 570, in invoke
+    await ctx.command.invoke(ctx)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 920, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 178, in wrapped
+    raise CommandInvokeError(exc) from exc
+disnake.ext.commands.errors.CommandInvokeError: Command raised an exception: ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky?blacklistFlags=nsfw,racist,sexist,explicit')
+

@@ -1,9 +1,10 @@
 import aiohttp
+import asyncio
 import disnake
 from disnake.ext import commands
-import time
 
 from common_functions.gif_function import get_gif
+from loggers import cmdLogger as infoLogger
 
 
 class CommonCog(commands.Cog):
@@ -17,13 +18,13 @@ class CommonCog(commands.Cog):
         await ctx.send(
             f"Pong! I'm alive.\nLatency = {round(self.bot.latency * 1000, 3)} ms"
         )
-        print(f"Told {ctx.author} that I'm alive.")
+        infoLogger.info(f"Told {ctx.author} that I'm alive.")
 
     @commands.command(name="hello", help="Says hello")
     @commands.guild_only()
     async def say_hello(self, ctx):
-        await ctx.reply(f"Hello, {ctx.author}! Sokka, the boomerang guy here.")
-        print(f"\nSaid hello to {ctx.author}.")
+        await ctx.reply(f"Hello, {ctx.author.name}! Sokka, the boomerang guy here.")
+        infoLogger.info(f"Said hello to {ctx.author}.")
 
     @commands.command(name="joke", help="Tells you a joke")
     async def tell_joke(self, ctx):
@@ -31,15 +32,15 @@ class CommonCog(commands.Cog):
             request = await session.get(self.joke_api_request)
             json_data = await request.json()
 
-            if "joke" in json_data.keys():
+            if json_data['type'] == 'single':
                 await ctx.reply(json_data["joke"])
-                print(f"\nTold a one-part joke to {ctx.author}.")
+                infoLogger.info(f"Told a one-part joke to {ctx.author}.")
 
-            if "setup" and "delivery" in json_data.keys():
+            if json_data['type'] == 'twopart':
                 await ctx.reply(json_data["setup"])
-                time.sleep(1)
+                await asyncio.sleep(1)
                 await ctx.reply(json_data["delivery"])
-                print(f"\nTold a two-part joke to {ctx.author}.")
+                infoLogger.info(f"Told a two-part joke to {ctx.author}.")
 
     @commands.Cog.listener("on_message")
     async def send_gif(self, ctx):
@@ -57,7 +58,9 @@ class CommonCog(commands.Cog):
                     await ctx.reply(embed=embed)
                 else:
                     await ctx.reply(file=gif_file)
-                print(f"\nReacted with the {gif_title} GIF to {ctx.author}'s message.")
+                infoLogger.info(
+                    f"Reacted with the {gif_title} GIF to {ctx.author}'s message."
+                )
 
 
 def setup(bot):
