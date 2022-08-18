@@ -1,0 +1,27 @@
+
+WARNING:11-05-2022 10:45:30:
+Exception occured
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 169, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "/home/runner/SokkaBotCode/cogs/music.py", line 306, in play
+    client = await channel.connect()
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/abc.py", line 1762, in connect
+    await voice.connect(timeout=timeout, reconnect=reconnect)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/voice_client.py", line 388, in connect
+    await utils.sane_wait_for(futures, timeout=timeout)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/utils.py", line 580, in sane_wait_for
+    raise asyncio.TimeoutError()
+asyncio.exceptions.TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/bot_base.py", line 570, in invoke
+    await ctx.command.invoke(ctx)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 920, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/disnake/ext/commands/core.py", line 178, in wrapped
+    raise CommandInvokeError(exc) from exc
+disnake.ext.commands.errors.CommandInvokeError: Command raised an exception: TimeoutError: 
+

@@ -14,6 +14,7 @@ class ToolsCog(commands.Cog):
 
     @commands.command(name='duckduckgo', help='Does a simple DuckDuckGo search', aliases=['ddg'])
     async def ddg(self, ctx, *, query):
+        # Establishes connection with DDG API, returns response as data
         request = f"https://api.duckduckgo.com/?q={query}&format=json"
         async with aiohttp.ClientSession() as session:
             async with session.get(request) as response:
@@ -21,10 +22,12 @@ class ToolsCog(commands.Cog):
                 html = await response.text()
                 data = json.loads(html)
 
+        # Extracting basic info about query
         queryEmbed = disnake.Embed(
             title = data['Heading'],
             color = ctx.author.color)
 
+        # Returns the first five Related Topics to query
         if data['RelatedTopics']:
             other_results = ''
             for result in data["RelatedTopics"][:5]:
@@ -37,17 +40,18 @@ class ToolsCog(commands.Cog):
                 value=other_results,
                 inline=False
             )
-    
+
             if data['Abstract']:
                 queryEmbed.add_field(
                     name="Answer",
                     value=data['Abstract'], inline=False
                 )
-    
+
             if data['Image']:
                 queryEmbed.set_image(
                     url=f'https://duckduckgo.com{data["Image"]}')
-    
+
+            # Displays a short Insight if available
             if data['Infobox']:
                 for section in data['Infobox']['content'][:-1]:
                     queryEmbed.add_field(
@@ -63,7 +67,7 @@ class ToolsCog(commands.Cog):
                     inline=True)
     
     
-            
+        # If the query has no results, displays an error GIF    
         elif not data['RelatedTopics']:
             queryEmbed.set_image(url="https://c.tenor.com/KOZLvzU0o4kAAAAC/no-results.gif")
         
